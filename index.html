@@ -88,8 +88,12 @@
     </style>
 </head>
 
-<body
-    class="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300 font-sans antialiased min-h-screen flex flex-col pb-10">
+<body class="text-gray-800 dark:text-gray-100 font-sans antialiased min-h-screen flex flex-col pb-10">
+
+    <!-- Global App Background -->
+    <div class="fixed inset-0 w-full h-full -z-[100] bg-cover bg-center bg-no-repeat" style="background-image: url('assets/login-bg.png');">
+        <div class="absolute inset-0 bg-gray-50/70 dark:bg-gray-950/80 backdrop-blur-[6px] transition-colors duration-300 pointer-events-none"></div>
+    </div>
 
     <!-- Toast Notifications -->
     <div id="toast-container"
@@ -119,8 +123,7 @@
     </div>
 
     <!-- Top Navigation -->
-    <nav
-        class="sticky top-0 z-50 bg-white dark:bg-gray-800 shadow-md transition-colors duration-300 border-b border-gray-200 dark:border-gray-700">
+    <nav class="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-sm transition-colors duration-300 border-b border-white/50 dark:border-gray-800/50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <!-- Branding -->
@@ -173,51 +176,65 @@
     <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-4 sm:py-6">
 
         <!-- ================= LOGIN SCREEN ================= -->
-        <section id="login-view" class="view-section">
-            <div class="flex flex-col items-center justify-center min-h-[60vh]">
-                <div
-                    class="glass-card w-full max-w-md p-8 rounded-3xl shadow-lg border border-gray-200 dark:border-gray-700 mx-auto mt-10 sm:mt-20">
-                    <div class="text-center mb-8">
-                        <div
-                            class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30 text-primary mb-4">
-                            <i class="fa-solid fa-shield-halved text-3xl drop-shadow-sm"></i>
-                        </div>
-                        <h2 class="text-2xl font-black text-gray-900 dark:text-white tracking-tight">System Login</h2>
-                        <p class="text-sm text-gray-500 mt-2">Enter credentials to securely access your data.</p>
-                    </div>
+        <section id="login-view" class="view-section fixed inset-0 z-[100] w-full h-full">
+            <!-- Full Background Image with Overlay -->
+            <div class="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat shadow-2xl overflow-hidden" style="background-image: url('assets/login-bg.png');">
+                <div class="absolute inset-0 bg-gray-900/40 backdrop-blur-[2px]"></div>
+            </div>
 
-                    <form id="login-form" onsubmit="attemptLogin(event)">
-                        <div class="space-y-5">
-                            <div>
-                                <label class="block text-xs font-bold mb-2 text-gray-500 uppercase tracking-wider">Staff
-                                    ID Code / Username</label>
-                                <input type="text" id="login-username" required autocomplete="username"
-                                    class="w-full p-4 border border-gray-300 rounded-xl bg-gray-50 focus:ring-2 focus:ring-primary dark:bg-gray-800 dark:border-gray-600 font-bold text-gray-900 dark:text-gray-100"
-                                    placeholder="Enter your ID">
+            <!-- Inner Flex Wrapper for Centering because .view-section.active uses display: block -->
+            <div class="relative z-10 w-full h-full flex flex-col items-center justify-center p-4">
+                <div id="login-card-container" class="w-full max-w-md perspective-1000 mx-auto">
+                    <!-- Premium Glass Card -->
+                    <div class="p-8 sm:p-10 rounded-[2.5rem] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] border border-white/20 dark:border-white/10 mx-auto backdrop-blur-3xl bg-white/60 dark:bg-gray-900/70 overflow-hidden relative group/card transition-all duration-500 ease-out hover:-translate-y-2 hover:scale-[1.02] hover:shadow-[0_40px_60px_-15px_rgba(0,0,0,0.4)] dark:hover:shadow-[0_40px_60px_-15px_rgba(0,0,0,0.9)]">
+                        
+                        <!-- Decorative glowing orbs -->
+                        <div class="absolute -top-32 -right-32 w-80 h-80 bg-blue-500/30 blur-[70px] rounded-full pointer-events-none transition-transform duration-1000 group-hover/card:scale-125 group-hover/card:translate-x-10 group-hover/card:-translate-y-10"></div>
+                        <div class="absolute -bottom-32 -left-32 w-80 h-80 bg-indigo-500/30 blur-[70px] rounded-full pointer-events-none transition-transform duration-1000 group-hover/card:scale-125 group-hover/card:-translate-x-10 group-hover/card:translate-y-10"></div>
+
+                        <div class="text-center mb-8 relative z-10">
+                            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 text-white shadow-xl shadow-blue-500/30 mb-5 transform rotate-3 hover:rotate-0 hover:scale-105 transition-all duration-300">
+                                <i class="fa-solid fa-gas-pump text-3xl"></i>
                             </div>
-                            <div class="relative mb-6">
-                                <label
-                                    class="block text-xs font-bold mb-2 text-gray-500 uppercase tracking-wider">Security
-                                    Password</label>
-                                <input type="password" id="login-password" required autocomplete="current-password"
-                                    class="w-full p-4 pr-12 border border-gray-300 rounded-xl bg-gray-50 focus:ring-2 focus:ring-primary dark:bg-gray-800 dark:border-gray-600 font-bold text-gray-900 dark:text-gray-100"
-                                    placeholder="Enter password">
-                                <button type="button"
-                                    onclick="togglePasswordVisibility('login-password', 'login-eye-icon')"
-                                    class="absolute bottom-[18px] right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none">
-                                    <i id="login-eye-icon" class="fa-solid fa-eye text-lg"></i>
+                            <h2 class="text-3xl font-black text-gray-900 dark:text-white tracking-tight drop-shadow-sm">Welcome Back</h2>
+                            <p class="text-xs font-black text-gray-700/80 dark:text-gray-300/80 mt-2 tracking-[0.2em] uppercase">Santosh Filling Station</p>
+                        </div>
+
+                        <form id="login-form" onsubmit="attemptLogin(event)" class="relative z-10">
+                            <div class="space-y-5">
+                                <div class="relative group/input">
+                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500 dark:text-gray-400 group-focus-within/input:text-blue-600 dark:group-focus-within/input:text-blue-400 transition-colors">
+                                        <i class="fa-solid fa-user"></i>
+                                    </div>
+                                    <input type="text" id="login-username" required autocomplete="username"
+                                        class="w-full pl-11 pr-4 py-3.5 border border-white/40 dark:border-gray-700/50 rounded-xl bg-white/50 focus:bg-white focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500/50 dark:bg-gray-800/60 dark:focus:bg-gray-800 font-bold text-gray-900 dark:text-white transition-all shadow-sm placeholder-gray-500 dark:placeholder-gray-400 outline-none backdrop-blur-md"
+                                        placeholder="Staff ID / Username">
+                                </div>
+                                
+                                <div class="relative group/input mb-8">
+                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500 dark:text-gray-400 group-focus-within/input:text-blue-600 dark:group-focus-within/input:text-blue-400 transition-colors">
+                                        <i class="fa-solid fa-lock"></i>
+                                    </div>
+                                    <input type="password" id="login-password" required autocomplete="current-password"
+                                        class="w-full pl-11 pr-12 py-3.5 border border-white/40 dark:border-gray-700/50 rounded-xl bg-white/50 focus:bg-white focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500/50 dark:bg-gray-800/60 dark:focus:bg-gray-800 font-bold text-gray-900 dark:text-white transition-all shadow-sm placeholder-gray-500 dark:placeholder-gray-400 outline-none backdrop-blur-md"
+                                        placeholder="Security Password">
+                                    <button type="button" onclick="togglePasswordVisibility('login-password', 'login-eye-icon')"
+                                        class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white focus:outline-none transition-colors">
+                                        <i id="login-eye-icon" class="fa-solid fa-eye text-lg"></i>
+                                    </button>
+                                </div>
+                                
+                                <button type="submit"
+                                    class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-4 px-6 rounded-xl font-black text-lg hover:shadow-[0_10px_25px_rgba(79,70,229,0.5)] transition-all active:scale-95 flex items-center justify-center gap-3 border border-indigo-400/30 group/btn">
+                                    <span>Authorized Login</span>
+                                    <i class="fa-solid fa-arrow-right-to-bracket relative group-hover/btn:translate-x-1.5 transition-transform"></i>
                                 </button>
                             </div>
-                            <button type="submit"
-                                class="w-full bg-primary hover:bg-blue-700 text-white p-4 rounded-xl font-bold text-lg shadow-md transition active:scale-95 flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-arrow-right-to-bracket"></i> Authorized Login
-                            </button>
-                        </div>
-                    </form>
+                        </form>
+                    </div>
                 </div>
             </div>
         </section>
-
         <!-- ================= MANAGER DASHBOARD ================= -->
         <section id="manager-dashboard" class="view-section">
             <div class="mb-4 sm:mb-6 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
@@ -3403,6 +3420,18 @@
 
             const prefix = singleShiftId ? `SFS_SingleShift_${shiftsToExport[0].staffName.replace(/\s+/g, '')}` : `SFS_Shift_Report`;
             const filename = `${prefix}_${new Date().getTime()}.pdf`;
+            if (currentUser && currentUser.role === 'manager') {
+                const pageCount = doc.internal.getNumberOfPages();
+                const pageWidth = doc.internal.pageSize.width || doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.height || doc.internal.pageSize.getHeight();
+                for(let i = 1; i <= pageCount; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(10);
+                    doc.setTextColor(150, 150, 150);
+                    doc.text("Made By Suraj Debnath", pageWidth / 2, pageHeight - 10, { align: 'center' });
+                }
+            }
+
             const dataUri = doc.output('datauristring');
 
             openExternalDownload(dataUri, filename);
@@ -3757,3 +3786,5 @@
 </body>
 
 </html>
+
+
