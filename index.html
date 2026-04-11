@@ -121,7 +121,7 @@
     <!-- Top Navigation -->
     <nav
         class="sticky top-0 z-50 backdrop-blur-xl bg-white/60 dark:bg-gray-800/60 border border-white/50 dark:border-white/10 shadow-md transition-colors duration-300 border-b border-gray-200 dark:border-gray-700">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-10">
             <div class="flex justify-between h-16 items-center">
                 <!-- Branding -->
                 <div class="flex items-center gap-2 text-primary cursor-pointer"
@@ -170,7 +170,7 @@
     </nav>
 
     <!-- Main Content Area -->
-    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-4 sm:py-6">
+    <main class="flex-grow w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-10 w-full py-4 sm:py-6">
 
         <!-- ================= LOGIN SCREEN ================= -->
         <section id="login-view" class="view-section">
@@ -227,10 +227,16 @@
                     <p id="dashboard-subtitle" class="text-gray-500 text-sm">Overview, reporting, and staff
                         administration</p>
                 </div>
-                <button onclick="openShiftEntry()"
-                    class="bg-primary hover:bg-blue-700 text-white w-full md:w-auto px-5 py-3 md:py-2.5 rounded-xl font-bold transition shadow-md flex items-center justify-center gap-2 active:scale-95">
-                    <i class="fa-solid fa-file-pen"></i> Enter New Shift Data
-                </button>
+                <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                    <button id="btn-enter-d2d" onclick="openD2DEntry()"
+                        class="bg-green-600 hover:bg-green-700 text-white w-full md:w-auto px-5 py-3 md:py-2.5 rounded-xl font-bold transition shadow-md flex items-center justify-center gap-2 active:scale-95">
+                        <i class="fa-solid fa-calendar-day"></i> Enter Day To Day
+                    </button>
+                    <button onclick="openShiftEntry()"
+                        class="bg-primary hover:bg-blue-700 text-white w-full md:w-auto px-5 py-3 md:py-2.5 rounded-xl font-bold transition shadow-md flex items-center justify-center gap-2 active:scale-95">
+                        <i class="fa-solid fa-file-pen"></i> Enter New Shift Data
+                    </button>
+                </div>
             </div>
 
             <!-- Tabs -->
@@ -258,6 +264,11 @@
                             class="p-2.5 border rounded-xl backdrop-blur-xl bg-white/60 dark:bg-gray-800/60 border border-white/50 dark:border-white/10 dark:border-gray-600 font-medium w-full md:w-auto focus:ring-primary focus:border-primary text-sm sm:text-base">
                             <option value="">All Staff</option>
                             <!-- Populated dynamically -->
+                        </select>
+                        <select id="filter-mode"
+                            class="p-2.5 border rounded-xl backdrop-blur-xl bg-white/60 dark:bg-gray-800/60 border border-white/50 dark:border-white/10 dark:border-gray-600 font-medium w-full md:w-auto focus:ring-primary focus:border-primary text-sm sm:text-base">
+                            <option value="summary">Summary View</option>
+                            <option value="detailed">Day-to-Day Shift View</option>
                         </select>
                         <div class="flex w-full md:w-auto gap-2">
                             <button onclick="renderReports()"
@@ -357,7 +368,7 @@
                     class="backdrop-blur-xl bg-white/60 dark:bg-gray-800/60 border border-white/50 dark:border-white/10 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.1)] overflow-hidden">
                     <div class="overflow-x-auto no-scrollbar">
                         <table class="w-full text-sm text-left whitespace-nowrap min-w-[950px]">
-                            <thead
+                            <thead id="reports-table-head"
                                 class="text-xs text-gray-600 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-300 font-black">
                                 <tr>
                                     <th class="px-5 py-4">Date & Shift</th>
@@ -610,8 +621,9 @@
             </div>
         </section>
 
-        <!-- ================= SHIFT ENTRY FORM (THE CORE) ================= -->
-        <section id="shift-entry-view" class="view-section">
+
+        <!-- ================= D2D ENTRY FORM ================= -->
+<section id="shift-entry-view" class="view-section">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
                 <div>
                     <h1 class="text-2xl font-black text-gray-900 dark:text-white">Daily Shift Entry</h1>
@@ -1221,6 +1233,645 @@
             </form>
         </section>
 
+        <section id="d2d-entry-view" class="view-section">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+                <div>
+                    <h1 class="text-2xl font-black text-gray-900 dark:text-white"><i
+                            class="fa-solid fa-calendar-day mr-2 text-green-500"></i>Master Daily Summary</h1>
+                    <p class="text-gray-500 font-medium" id="d2d-date-display"></p>
+                </div>
+                <div class="flex gap-2 w-full sm:w-fit">
+                    <button type="button" onclick="cancelD2DEntry()"
+                        class="flex-1 sm:flex-none text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white font-bold bg-gray-200 dark:bg-gray-700 px-5 py-3 sm:py-2.5 rounded-xl transition active:scale-95 flex items-center justify-center">
+                        <i class="fa-solid fa-arrow-left mr-2"></i> Cancel & Return
+                    </button>
+                </div>
+            </div>
+
+            <form id="d2d-form" class="space-y-6">
+                <!-- 1. Meta Data & Rates -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="glass-card p-5 sm:p-6 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.1)]">
+                        <h3 class="font-black text-lg mb-4 sm:mb-5 text-primary"><i
+                                class="fa-solid fa-address-card mr-2"></i>Identification</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+                            <div>
+                                <label
+                                    class="block text-xs font-bold mb-1.5 text-gray-500 uppercase tracking-wider">Date</label>
+                                <input type="date" id="d2d-date" required
+                                    class="w-full p-3 border border-gray-300 rounded-xl backdrop-blur-xl bg-white/60 dark:bg-gray-800/60 font-bold focus:ring-2 focus:ring-primary text-gray-800 dark:text-gray-100 text-base sm:text-sm">
+                            </div>
+                            <div>
+                                <label
+                                    class="block text-xs font-bold mb-1.5 text-gray-500 uppercase tracking-wider">Select
+                                    Manager</label>
+                                <select id="d2d-staff-select" required
+                                    class="w-full p-3 border border-gray-300 rounded-xl backdrop-blur-xl bg-white/60 dark:bg-gray-800/60 font-bold focus:ring-2 focus:ring-primary text-gray-800 dark:text-gray-100 text-base sm:text-sm">
+                                    <!-- Populated dynamically -->
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div
+                        class="glass-card p-5 sm:p-6 rounded-2xl shadow-sm border-l-4 border-l-blue-500 border border-gray-200 dark:border-gray-700">
+                        <div class="flex justify-between items-center mb-4 sm:mb-5">
+                            <h3 class="font-black text-lg text-primary"><i class="fa-solid fa-tags mr-2"></i>Today's
+                                Fuel Rates</h3>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+                            <div>
+                                <label class="block text-xs font-bold mb-1.5 text-gray-500 uppercase tracking-wider">HSD
+                                    Rate (Diesel)</label>
+                                <div class="relative">
+                                    <span
+                                        class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-500 font-black">₹</span>
+                                    <input type="number" step="0.01" id="d2d-rate-hsd" readonly
+                                        class="w-full pl-9 p-3 border border-gray-300 rounded-xl bg-gray-50 font-black text-lg text-blue-600 dark:text-blue-400 dark:bg-gray-800/80 dark:border-gray-600 cursor-not-allowed">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold mb-1.5 text-gray-500 uppercase tracking-wider">MS
+                                    Rate (Petrol)</label>
+                                <div class="relative">
+                                    <span
+                                        class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-500 font-black">₹</span>
+                                    <input type="number" step="0.01" id="d2d-rate-ms" readonly
+                                        class="w-full pl-9 p-3 border border-gray-300 rounded-xl bg-gray-50 font-black text-lg text-orange-600 dark:text-orange-400 dark:bg-gray-800/80 dark:border-gray-600 cursor-not-allowed">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                                <!-- 2. Machine 1 Readings -->
+                <div
+                    class="backdrop-blur-xl bg-white/60 dark:bg-gray-800/60 p-5 sm:p-6 rounded-2xl shadow-sm border-t-4 border-t-primary border border-white/50 dark:border-gray-700 mb-6">
+                    <div
+                        class="flex flex-col sm:flex-row justify-between sm:items-center mb-5 border-b pb-4 dark:border-gray-700 gap-3">
+                        <h3 class="font-black text-lg flex items-center gap-2">
+                            <i class="fa-solid fa-gas-pump text-primary"></i> Machine 1 (M2401451) Readings
+                        </h3>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+                        <!-- HSD Column -->
+                        <div class="space-y-4 sm:space-y-5">
+                            <h4
+                                class="font-black text-sm text-blue-600 dark:text-blue-400 flex items-center uppercase tracking-wider bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-lg w-fit">
+                                <div class="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm shadow-blue-500 mr-2"></div>
+                                Diesel (HSD)
+                            </h4>
+                            <!-- N1 -->
+                            <div
+                                class="bg-gray-50 dark:bg-gray-900/50 p-3.5 sm:p-4 rounded-xl border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
+                                <div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-400 opacity-50"></div>
+                                <h4
+                                    class="font-bold text-sm mb-3 text-gray-700 dark:text-gray-300 flex items-center pl-1">
+                                    Nozzle 1 (N1)</h4>
+                                <div class="grid grid-cols-2 gap-2 sm:gap-4 pl-1">
+                                    <div>
+                                        <label
+                                            class="text-[11px] sm:text-xs font-semibold text-gray-500 mb-1 block">Opening</label>
+                                        <input type="number" step="0.01" id="d2d-m1-on1" oninput="calcD2DTotals()"
+                                            class="w-full p-2 sm:p-2.5 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-600 font-medium text-base sm:text-sm"
+                                            placeholder="0.00">
+                                    </div>
+                                    <div>
+                                        <label
+                                            class="text-[11px] sm:text-xs font-semibold text-gray-500 mb-1 block">Closing</label>
+                                        <input type="number" step="0.01" id="d2d-m1-cn1" oninput="calcD2DTotals()"
+                                            class="w-full p-2 sm:p-2.5 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-600 font-medium text-base sm:text-sm"
+                                            placeholder="0.00">
+                                    </div>
+                                </div>
+                                <div
+                                    class="mt-3 text-right text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg ml-1">
+                                    TN1: <span id="d2d-m1-tn1">0.00</span> Ltr
+                                </div>
+                            </div>
+                            <!-- N2 -->
+                            <div
+                                class="bg-gray-50 dark:bg-gray-900/50 p-3.5 sm:p-4 rounded-xl border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
+                                <div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-400 opacity-50"></div>
+                                <h4
+                                    class="font-bold text-sm mb-3 text-gray-700 dark:text-gray-300 flex items-center pl-1">
+                                    Nozzle 2 (N2)</h4>
+                                <div class="grid grid-cols-2 gap-2 sm:gap-4 pl-1">
+                                    <div>
+                                        <label
+                                            class="text-[11px] sm:text-xs font-semibold text-gray-500 mb-1 block">Opening</label>
+                                        <input type="number" step="0.01" id="d2d-m1-on2" oninput="calcD2DTotals()"
+                                            class="w-full p-2 sm:p-2.5 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-600 font-medium text-base sm:text-sm"
+                                            placeholder="0.00">
+                                    </div>
+                                    <div>
+                                        <label
+                                            class="text-[11px] sm:text-xs font-semibold text-gray-500 mb-1 block">Closing</label>
+                                        <input type="number" step="0.01" id="d2d-m1-cn2" oninput="calcD2DTotals()"
+                                            class="w-full p-2 sm:p-2.5 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-600 font-medium text-base sm:text-sm"
+                                            placeholder="0.00">
+                                    </div>
+                                </div>
+                                <div
+                                    class="mt-3 text-right text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg ml-1">
+                                    TN2: <span id="d2d-m1-tn2">0.00</span> Ltr
+                                </div>
+                            </div>
+                                <div class="mt-4 pt-3 border-t-2 border-blue-200 dark:border-blue-800 flex justify-between items-center text-blue-700 dark:text-blue-400">
+                                    <span class="font-black text-sm uppercase tracking-wider">Total H.S.D</span>
+                                    <span class="font-black text-lg"><span id="d2d-m1-total-hsd">0.00</span> Ltr</span>
+                                </div>
+
+                        </div>
+
+                        <!-- MS Column -->
+                        <div class="space-y-4 sm:space-y-5">
+                            <h4
+                                class="font-black text-sm text-orange-600 dark:text-orange-400 flex items-center uppercase tracking-wider bg-orange-50 dark:bg-orange-900/20 px-3 py-1.5 rounded-lg w-fit">
+                                <div class="w-2.5 h-2.5 rounded-full bg-orange-500 shadow-sm shadow-orange-500 mr-2">
+                                </div> Petrol (MS)
+                            </h4>
+                            <!-- N3 -->
+                            <div
+                                class="bg-gray-50 dark:bg-gray-900/50 p-3.5 sm:p-4 rounded-xl border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
+                                <div class="absolute left-0 top-0 bottom-0 w-1 bg-orange-400 opacity-50"></div>
+                                <h4
+                                    class="font-bold text-sm mb-3 text-gray-700 dark:text-gray-300 flex items-center pl-1">
+                                    Nozzle 3 (N3)</h4>
+                                <div class="grid grid-cols-2 gap-2 sm:gap-4 pl-1">
+                                    <div>
+                                        <label
+                                            class="text-[11px] sm:text-xs font-semibold text-gray-500 mb-1 block">Opening</label>
+                                        <input type="number" step="0.01" id="d2d-m1-on3" oninput="calcD2DTotals()"
+                                            class="w-full p-2 sm:p-2.5 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-600 font-medium text-base sm:text-sm"
+                                            placeholder="0.00">
+                                    </div>
+                                    <div>
+                                        <label
+                                            class="text-[11px] sm:text-xs font-semibold text-gray-500 mb-1 block">Closing</label>
+                                        <input type="number" step="0.01" id="d2d-m1-cn3" oninput="calcD2DTotals()"
+                                            class="w-full p-2 sm:p-2.5 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-600 font-medium text-base sm:text-sm"
+                                            placeholder="0.00">
+                                    </div>
+                                </div>
+                                <div
+                                    class="mt-3 text-right text-xs font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 p-2 rounded-lg ml-1">
+                                    TN3: <span id="d2d-m1-tn3">0.00</span> Ltr
+                                </div>
+                            </div>
+                            <!-- N4 -->
+                            <div
+                                class="bg-gray-50 dark:bg-gray-900/50 p-3.5 sm:p-4 rounded-xl border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
+                                <div class="absolute left-0 top-0 bottom-0 w-1 bg-orange-400 opacity-50"></div>
+                                <h4
+                                    class="font-bold text-sm mb-3 text-gray-700 dark:text-gray-300 flex items-center pl-1">
+                                    Nozzle 4 (N4)</h4>
+                                <div class="grid grid-cols-2 gap-2 sm:gap-4 pl-1">
+                                    <div>
+                                        <label
+                                            class="text-[11px] sm:text-xs font-semibold text-gray-500 mb-1 block">Opening</label>
+                                        <input type="number" step="0.01" id="d2d-m1-on4" oninput="calcD2DTotals()"
+                                            class="w-full p-2 sm:p-2.5 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-600 font-medium text-base sm:text-sm"
+                                            placeholder="0.00">
+                                    </div>
+                                    <div>
+                                        <label
+                                            class="text-[11px] sm:text-xs font-semibold text-gray-500 mb-1 block">Closing</label>
+                                        <input type="number" step="0.01" id="d2d-m1-cn4" oninput="calcD2DTotals()"
+                                            class="w-full p-2 sm:p-2.5 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-600 font-medium text-base sm:text-sm"
+                                            placeholder="0.00">
+                                    </div>
+                                </div>
+                                <div
+                                    class="mt-3 text-right text-xs font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 p-2 rounded-lg ml-1">
+                                    TN4: <span id="d2d-m1-tn4">0.00</span> Ltr
+                                </div>
+                            </div>
+                                <div class="mt-4 pt-3 border-t-2 border-orange-200 dark:border-orange-800 flex justify-between items-center text-orange-700 dark:text-orange-400">
+                                    <span class="font-black text-sm uppercase tracking-wider">Total M.S</span>
+                                    <span class="font-black text-lg"><span id="d2d-m1-total-ms">0.00</span> Ltr</span>
+                                </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Machine 2 Readings -->
+                <div
+                    class="backdrop-blur-xl bg-white/60 dark:bg-gray-800/60 p-5 sm:p-6 rounded-2xl shadow-sm border-t-4 border-t-primary border border-white/50 dark:border-gray-700 mb-6">
+                    <div
+                        class="flex flex-col sm:flex-row justify-between sm:items-center mb-5 border-b pb-4 dark:border-gray-700 gap-3">
+                        <h3 class="font-black text-lg flex items-center gap-2">
+                            <i class="fa-solid fa-gas-pump text-primary"></i> Machine 2 (M2401422) Readings
+                        </h3>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+                        <!-- HSD Column -->
+                        <div class="space-y-4 sm:space-y-5">
+                            <!-- N1 -->
+                            <div
+                                class="bg-gray-50 dark:bg-gray-900/50 p-3.5 sm:p-4 rounded-xl border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
+                                <div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-400 opacity-50"></div>
+                                <h4
+                                    class="font-bold text-sm mb-3 text-gray-700 dark:text-gray-300 flex items-center pl-1">
+                                    Nozzle 1 (N1)</h4>
+                                <div class="grid grid-cols-2 gap-2 sm:gap-4 pl-1">
+                                    <div>
+                                        <label
+                                            class="text-[11px] sm:text-xs font-semibold text-gray-500 mb-1 block">Opening</label>
+                                        <input type="number" step="0.01" id="d2d-m2-on1" oninput="calcD2DTotals()"
+                                            class="w-full p-2 sm:p-2.5 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-600 font-medium text-base sm:text-sm"
+                                            placeholder="0.00">
+                                    </div>
+                                    <div>
+                                        <label
+                                            class="text-[11px] sm:text-xs font-semibold text-gray-500 mb-1 block">Closing</label>
+                                        <input type="number" step="0.01" id="d2d-m2-cn1" oninput="calcD2DTotals()"
+                                            class="w-full p-2 sm:p-2.5 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-600 font-medium text-base sm:text-sm"
+                                            placeholder="0.00">
+                                    </div>
+                                </div>
+                                <div
+                                    class="mt-3 text-right text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg ml-1">
+                                    TN1: <span id="d2d-m2-tn1">0.00</span> Ltr
+                                </div>
+                            </div>
+                            <!-- N2 -->
+                            <div
+                                class="bg-gray-50 dark:bg-gray-900/50 p-3.5 sm:p-4 rounded-xl border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
+                                <div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-400 opacity-50"></div>
+                                <h4
+                                    class="font-bold text-sm mb-3 text-gray-700 dark:text-gray-300 flex items-center pl-1">
+                                    Nozzle 2 (N2)</h4>
+                                <div class="grid grid-cols-2 gap-2 sm:gap-4 pl-1">
+                                    <div>
+                                        <label
+                                            class="text-[11px] sm:text-xs font-semibold text-gray-500 mb-1 block">Opening</label>
+                                        <input type="number" step="0.01" id="d2d-m2-on2" oninput="calcD2DTotals()"
+                                            class="w-full p-2 sm:p-2.5 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-600 font-medium text-base sm:text-sm"
+                                            placeholder="0.00">
+                                    </div>
+                                    <div>
+                                        <label
+                                            class="text-[11px] sm:text-xs font-semibold text-gray-500 mb-1 block">Closing</label>
+                                        <input type="number" step="0.01" id="d2d-m2-cn2" oninput="calcD2DTotals()"
+                                            class="w-full p-2 sm:p-2.5 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-600 font-medium text-base sm:text-sm"
+                                            placeholder="0.00">
+                                    </div>
+                                </div>
+                                <div
+                                    class="mt-3 text-right text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg ml-1">
+                                    TN2: <span id="d2d-m2-tn2">0.00</span> Ltr
+                                </div>
+                            </div>
+                                <div class="mt-4 pt-3 border-t-2 border-blue-200 dark:border-blue-800 flex justify-between items-center text-blue-700 dark:text-blue-400">
+                                    <span class="font-black text-sm uppercase tracking-wider">Total H.S.D</span>
+                                    <span class="font-black text-lg"><span id="d2d-m2-total-hsd">0.00</span> Ltr</span>
+                                </div>
+
+                        </div>
+
+                        <!-- MS Column -->
+                        <div class="space-y-4 sm:space-y-5">
+                            <!-- N3 -->
+                            <div
+                                class="bg-gray-50 dark:bg-gray-900/50 p-3.5 sm:p-4 rounded-xl border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
+                                <div class="absolute left-0 top-0 bottom-0 w-1 bg-orange-400 opacity-50"></div>
+                                <h4
+                                    class="font-bold text-sm mb-3 text-gray-700 dark:text-gray-300 flex items-center pl-1">
+                                    Nozzle 3 (N3)</h4>
+                                <div class="grid grid-cols-2 gap-2 sm:gap-4 pl-1">
+                                    <div>
+                                        <label
+                                            class="text-[11px] sm:text-xs font-semibold text-gray-500 mb-1 block">Opening</label>
+                                        <input type="number" step="0.01" id="d2d-m2-on3" oninput="calcD2DTotals()"
+                                            class="w-full p-2 sm:p-2.5 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-600 font-medium text-base sm:text-sm"
+                                            placeholder="0.00">
+                                    </div>
+                                    <div>
+                                        <label
+                                            class="text-[11px] sm:text-xs font-semibold text-gray-500 mb-1 block">Closing</label>
+                                        <input type="number" step="0.01" id="d2d-m2-cn3" oninput="calcD2DTotals()"
+                                            class="w-full p-2 sm:p-2.5 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-600 font-medium text-base sm:text-sm"
+                                            placeholder="0.00">
+                                    </div>
+                                </div>
+                                <div
+                                    class="mt-3 text-right text-xs font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 p-2 rounded-lg ml-1">
+                                    TN3: <span id="d2d-m2-tn3">0.00</span> Ltr
+                                </div>
+                            </div>
+                            <!-- N4 -->
+                            <div
+                                class="bg-gray-50 dark:bg-gray-900/50 p-3.5 sm:p-4 rounded-xl border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
+                                <div class="absolute left-0 top-0 bottom-0 w-1 bg-orange-400 opacity-50"></div>
+                                <h4
+                                    class="font-bold text-sm mb-3 text-gray-700 dark:text-gray-300 flex items-center pl-1">
+                                    Nozzle 4 (N4)</h4>
+                                <div class="grid grid-cols-2 gap-2 sm:gap-4 pl-1">
+                                    <div>
+                                        <label
+                                            class="text-[11px] sm:text-xs font-semibold text-gray-500 mb-1 block">Opening</label>
+                                        <input type="number" step="0.01" id="d2d-m2-on4" oninput="calcD2DTotals()"
+                                            class="w-full p-2 sm:p-2.5 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-600 font-medium text-base sm:text-sm"
+                                            placeholder="0.00">
+                                    </div>
+                                    <div>
+                                        <label
+                                            class="text-[11px] sm:text-xs font-semibold text-gray-500 mb-1 block">Closing</label>
+                                        <input type="number" step="0.01" id="d2d-m2-cn4" oninput="calcD2DTotals()"
+                                            class="w-full p-2 sm:p-2.5 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-600 font-medium text-base sm:text-sm"
+                                            placeholder="0.00">
+                                    </div>
+                                </div>
+                                <div
+                                    class="mt-3 text-right text-xs font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 p-2 rounded-lg ml-1">
+                                    TN4: <span id="d2d-m2-tn4">0.00</span> Ltr
+                                </div>
+                            </div>
+                                <div class="mt-4 pt-3 border-t-2 border-orange-200 dark:border-orange-800 flex justify-between items-center text-orange-700 dark:text-orange-400">
+                                    <span class="font-black text-sm uppercase tracking-wider">Total M.S</span>
+                                    <span class="font-black text-lg"><span id="d2d-m2-total-ms">0.00</span> Ltr</span>
+                                </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Testing Deduction & Final Volume -->
+                <div class="glass-card p-5 sm:p-6 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.1)] mb-6">
+                    <h3 class="font-black text-lg mb-4 sm:mb-5 text-primary border-b pb-3 dark:border-gray-700"><i
+                            class="fa-solid fa-vial-circle-check mr-2"></i>Testing Deductions (In Litres)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+                        <!-- HSD Testing -->
+                        <div
+                            class="bg-gray-50 dark:bg-gray-900/50 p-4 sm:p-5 rounded-xl border border-gray-200 dark:border-gray-700">
+                            <label class="block text-sm font-black mb-3 text-gray-800 dark:text-gray-200">Diesel
+                                (HSD)</label>
+                            <div class="flex flex-wrap gap-2 mb-3">
+                                <button type="button" onclick="document.getElementById('d2d-testing-hsd').value=parseFloat(document.getElementById('d2d-testing-hsd').value || 0)+10; calcD2DTotals();"
+                                    class="flex-1 py-2 sm:py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-xs font-bold hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30 transition shadow-sm active:scale-95">+10</button>
+                                <button type="button" onclick="document.getElementById('d2d-testing-hsd').value=parseFloat(document.getElementById('d2d-testing-hsd').value || 0)+20; calcD2DTotals();"
+                                    class="flex-1 py-2 sm:py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-xs font-bold hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30 transition shadow-sm active:scale-95">+20</button>
+                                <button type="button" onclick="document.getElementById('d2d-testing-hsd').value=parseFloat(document.getElementById('d2d-testing-hsd').value || 0)+50; calcD2DTotals();"
+                                    class="flex-1 py-2 sm:py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-xs font-bold hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30 transition shadow-sm active:scale-95">+50</button>
+                                <button type="button" onclick="document.getElementById('d2d-testing-hsd').value=''; calcD2DTotals();"
+                                    class="flex-1 py-2 sm:py-1.5 bg-red-50 border border-red-200 text-red-600 dark:bg-red-900/30 dark:border-red-800 dark:text-red-400 rounded-lg text-xs font-bold hover:bg-red-100 dark:hover:bg-red-900/50 transition shadow-sm active:scale-95">CLR</button>
+                            </div>
+                            <input type="number" id="d2d-testing-hsd" oninput="calcD2DTotals()"
+                                class="w-full p-3 border border-gray-300 rounded-lg backdrop-blur-xl bg-white/60 dark:bg-gray-800/60 border border-white/50 dark:border-white/10 dark:border-gray-600 font-medium text-base sm:text-sm"
+                                placeholder="Custom amount" max="1000" min="0">
+                            <div
+                                class="mt-4 flex justify-between items-center border-t border-gray-200 dark:border-gray-700 pt-3">
+                                <span class="text-xs font-bold text-gray-500 uppercase">Net Sale Vol</span>
+                                <span class="font-black text-xl text-blue-600 dark:text-blue-400"><span
+                                        id="d2d-final-hsd">0.00</span> L</span>
+                            </div>
+                        </div>
+
+                        <!-- MS Testing -->
+                        <div
+                            class="bg-gray-50 dark:bg-gray-900/50 p-4 sm:p-5 rounded-xl border border-gray-200 dark:border-gray-700">
+                            <label class="block text-sm font-black mb-3 text-gray-800 dark:text-gray-200">Petrol
+                                (MS)</label>
+                            <div class="flex flex-wrap gap-2 mb-3">
+                                <button type="button" onclick="document.getElementById('d2d-testing-ms').value=parseFloat(document.getElementById('d2d-testing-ms').value || 0)+10; calcD2DTotals();"
+                                    class="flex-1 py-2 sm:py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-xs font-bold hover:bg-orange-50 hover:text-orange-600 dark:hover:bg-orange-900/30 transition shadow-sm active:scale-95">+10</button>
+                                <button type="button" onclick="document.getElementById('d2d-testing-ms').value=parseFloat(document.getElementById('d2d-testing-ms').value || 0)+20; calcD2DTotals();"
+                                    class="flex-1 py-2 sm:py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-xs font-bold hover:bg-orange-50 hover:text-orange-600 dark:hover:bg-orange-900/30 transition shadow-sm active:scale-95">+20</button>
+                                <button type="button" onclick="document.getElementById('d2d-testing-ms').value=parseFloat(document.getElementById('d2d-testing-ms').value || 0)+50; calcD2DTotals();"
+                                    class="flex-1 py-2 sm:py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-xs font-bold hover:bg-orange-50 hover:text-orange-600 dark:hover:bg-orange-900/30 transition shadow-sm active:scale-95">+50</button>
+                                <button type="button" onclick="document.getElementById('d2d-testing-ms').value=''; calcD2DTotals();"
+                                    class="flex-1 py-2 sm:py-1.5 bg-red-50 border border-red-200 text-red-600 dark:bg-red-900/30 dark:border-red-800 dark:text-red-400 rounded-lg text-xs font-bold hover:bg-red-100 dark:hover:bg-red-900/50 transition shadow-sm active:scale-95">CLR</button>
+                            </div>
+                            <input type="number" id="d2d-testing-ms" oninput="calcD2DTotals()"
+                                class="w-full p-3 border border-gray-300 rounded-lg backdrop-blur-xl bg-white/60 dark:bg-gray-800/60 border border-white/50 dark:border-white/10 dark:border-gray-600 font-medium text-base sm:text-sm"
+                                placeholder="Custom amount" max="1000" min="0">
+                            <div
+                                class="mt-4 flex justify-between items-center border-t border-gray-200 dark:border-gray-700 pt-3">
+                                <span class="text-xs font-bold text-gray-500 uppercase">Net Sale Vol</span>
+                                <span class="font-black text-xl text-orange-600 dark:text-orange-400"><span
+                                        id="d2d-final-ms">0.00</span> L</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. Sales Summary (Calculated) -->
+                <div class="bg-gradient-to-br from-indigo-600 to-blue-800 rounded-2xl p-5 sm:p-6 text-white shadow-xl mb-6">
+                    <h3
+                        class="font-black text-lg mb-4 sm:mb-5 text-white/90 border-b border-white/20 pb-3 flex items-center">
+                        <i class="fa-solid fa-calculator mr-3 text-xl"></i>Gross Sale Projection
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5 sm:mb-6">
+                        <div class="bg-white/10 rounded-xl p-4 border border-white/10">
+                            <div class="text-blue-200 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1.5">
+                                Diesel Segment</div>
+                            <div class="font-black text-2xl sm:text-3xl">₹<span id="d2d-cash-hsd">0</span></div>
+                        </div>
+                        <div class="bg-white/10 rounded-xl p-4 border border-white/10">
+                            <div class="text-blue-200 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1.5">
+                                Petrol Segment</div>
+                            <div class="font-black text-2xl sm:text-3xl">₹<span id="d2d-cash-ms">0</span></div>
+                        </div>
+                    </div>
+                    <div
+                        class="bg-white rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row sm:justify-between sm:items-center text-gray-900 shadow-inner gap-2">
+                        <span class="text-xs sm:text-sm font-black uppercase text-gray-500 tracking-wider">Total
+                            Required Collection</span>
+                        <span class="text-3xl md:text-4xl font-black text-blue-700">₹<span
+                                id="d2d-expected-sale">0</span></span>
+                    </div>
+                </div>
+
+                <!-- 6. Cash Drops -->
+                <div
+                    class="glass-card p-4 sm:p-6 rounded-2xl shadow-sm border-t-4 border-t-emerald-500 border border-gray-200 dark:border-gray-700 mb-6">
+                    <div
+                        class="flex flex-col sm:flex-row justify-between sm:items-center mb-5 border-b pb-4 dark:border-gray-700 gap-3">
+                        <h3 class="font-black text-lg"><i
+                                class="fa-solid fa-money-bill-wave mr-2 text-emerald-500"></i>Cash Drops</h3>
+                        <div
+                            class="text-right bg-emerald-50 dark:bg-emerald-900/20 px-4 py-2.5 rounded-xl border border-emerald-100 dark:border-emerald-800 flex sm:block justify-between items-center">
+                            <div
+                                class="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase font-black tracking-wider">
+                                Total Drop Value</div>
+                            <div class="text-emerald-600 dark:text-emerald-400 font-black text-xl sm:text-2xl">₹<span
+                                    id="d2d-shiftcash-sum">0</span></div>
+                        </div>
+                    </div>
+
+                    <div class="border border-emerald-200 dark:border-emerald-800 rounded-xl overflow-hidden bg-white dark:bg-gray-800 flex flex-col">
+                        <div id="d2d-cashdrop-container" class="p-4 space-y-3">
+                            <!-- Dynamic drops inserted here -->
+                        </div>
+                        <div class="p-4 pt-0 text-center border-t border-emerald-100 dark:border-emerald-800/50 mt-2">
+                            <button type="button" onclick="addD2DCashRow()"
+                                class="mt-2 text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/40 hover:bg-emerald-200 dark:hover:bg-emerald-900/60 font-bold px-4 py-3 rounded-xl text-sm w-full transition border border-emerald-200 dark:border-emerald-800 flex items-center justify-center gap-2"><i
+                                    class="fa-solid fa-plus-circle"></i> Add Cash Drop Entry</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7. Online Payments, Expenses, Lent -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div
+                        class="backdrop-blur-xl bg-white/60 dark:bg-gray-800/60 p-5 sm:p-6 rounded-2xl shadow-sm border-t-4 border-t-purple-500 border border-white/50 dark:border-gray-700 h-fit">
+                        <div class="flex justify-between items-center mb-5 border-b pb-3 dark:border-gray-700">
+                            <h3 class="font-black text-lg"><i
+                                    class="fa-solid fa-mobile-screen mr-2 text-purple-500"></i>Online Payments</h3>
+                            <span class="text-purple-600 dark:text-purple-400 font-black text-lg sm:text-xl">₹<span
+                                    id="d2d-online-sum">0</span></span>
+                        </div>
+                        <div class="space-y-3">
+                            <div
+                                class="flex items-center gap-2 sm:gap-3 bg-gray-50 dark:bg-gray-900/50 p-2 rounded-xl border border-gray-100 dark:border-gray-700">
+                                <div class="w-8 sm:w-10 flex justify-center text-gray-500"><i
+                                        class="fa-regular fa-credit-card text-lg sm:text-xl"></i></div>
+                                <input type="number" id="d2d-online-card" oninput="calcD2DTotals()"
+                                    class="flex-1 p-2 bg-transparent border-0 focus:ring-0 text-right font-bold text-base sm:text-lg w-full"
+                                    placeholder="0">
+                            </div>
+                            <div
+                                class="flex items-center gap-2 sm:gap-3 bg-gray-50 dark:bg-gray-900/50 p-2 rounded-xl border border-gray-100 dark:border-gray-700">
+                                <div class="w-8 sm:w-10 flex justify-center text-blue-500"><i
+                                        class="fa-brands fa-paypal text-lg sm:text-xl"></i></div>
+                                <input type="number" id="d2d-online-paytm" oninput="calcD2DTotals()"
+                                    class="flex-1 p-2 bg-transparent border-0 focus:ring-0 text-right font-bold text-base sm:text-lg w-full"
+                                    placeholder="0">
+                            </div>
+                            <div
+                                class="flex items-center gap-2 sm:gap-3 bg-gray-50 dark:bg-gray-900/50 p-2 rounded-xl border border-gray-100 dark:border-gray-700">
+                                <div class="w-8 sm:w-10 flex justify-center text-green-500"><i
+                                        class="fa-brands fa-google-pay text-xl sm:text-2xl"></i></div>
+                                <input type="number" id="d2d-online-gpay" oninput="calcD2DTotals()"
+                                    class="flex-1 p-2 bg-transparent border-0 focus:ring-0 text-right font-bold text-base sm:text-lg w-full"
+                                    placeholder="0">
+                            </div>
+                            <div
+                                class="flex items-center gap-2 sm:gap-3 bg-gray-50 dark:bg-gray-900/50 p-2 rounded-xl border border-gray-100 dark:border-gray-700">
+                                <div class="w-8 sm:w-10 flex justify-center text-green-500"><i
+                                        class="fa-brands fa-google-pay text-xl sm:text-2xl"></i></div>
+                                <input type="number" id="d2d-online-gpay2" oninput="calcD2DTotals()"
+                                    class="flex-1 p-2 bg-transparent border-0 focus:ring-0 text-right font-bold text-base sm:text-lg w-full"
+                                    placeholder="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-6">
+                        <div
+                            class="backdrop-blur-xl bg-white/60 dark:bg-gray-800/60 border border-white/50 dark:border-white/10 p-5 sm:p-6 rounded-2xl shadow-sm border-t-4 border-t-red-500 flex flex-col border border-gray-200 dark:border-gray-700">
+                            <div class="mb-4 border-b pb-3 dark:border-gray-700">
+                                <h3 class="font-black text-lg"><i
+                                        class="fa-solid fa-money-bill-transfer mr-2 text-red-500"></i>Expenses</h3>
+                                <p class="text-xs text-gray-500 mt-1 font-medium">Record any cash taken from drawer.</p>
+                            </div>
+                            <div
+                                class="flex-1 flex flex-col bg-red-50 dark:bg-red-900/10 p-3 sm:p-4 rounded-xl border border-red-100 dark:border-red-900/30">
+                                <div id="d2d-expenses-container"
+                                    class="space-y-3 mb-3 max-h-48 overflow-y-auto pr-1 no-scrollbar">
+                                    <!-- Dynamically populated rows -->
+                                </div>
+                                <button type="button" onclick="addD2DExpenseRow()"
+                                    class="w-full py-3 bg-red-100 hover:bg-red-200 text-red-700 dark:bg-red-900/40 dark:hover:bg-red-900/60 dark:text-red-400 font-bold rounded-xl transition border border-red-200 dark:border-red-800 text-sm mb-4 active:scale-95 flex items-center justify-center">
+                                    <i class="fa-solid fa-plus mr-2"></i> Add Expense Entry
+                                </button>
+                                <div
+                                    class="border-t border-red-200 dark:border-red-800 pt-3 flex justify-between items-center mt-auto">
+                                    <span
+                                        class="text-[10px] sm:text-xs font-bold text-red-700 dark:text-red-400 uppercase tracking-wider">Total
+                                        Exp</span>
+                                    <span class="text-xl sm:text-2xl font-black text-red-600 dark:text-red-400">₹<span
+                                            id="d2d-expense-sum">0</span></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div
+                            class="backdrop-blur-xl bg-white/60 dark:bg-gray-800/60 border border-white/50 dark:border-white/10 p-5 sm:p-6 rounded-2xl shadow-sm border-t-4 border-t-amber-500 flex flex-col border border-gray-200 dark:border-gray-700">
+                            <div class="mb-4 border-b pb-3 dark:border-gray-700">
+                                <h3 class="font-black text-lg"><i
+                                        class="fa-solid fa-hand-holding-dollar mr-2 text-amber-500"></i>Lent Money</h3>
+                                <p class="text-xs text-gray-500 mt-1 font-medium">Record any credit or money lent out.</p>
+                            </div>
+                            <div
+                                class="flex-1 flex flex-col bg-amber-50 dark:bg-amber-900/10 p-3 sm:p-4 rounded-xl border border-amber-100 dark:border-amber-900/30">
+                                <div id="d2d-lent-container"
+                                    class="space-y-3 mb-3 max-h-48 overflow-y-auto pr-1 no-scrollbar">
+                                    <!-- Dynamically populated rows -->
+                                </div>
+                                <button type="button" onclick="addD2DLentRow()"
+                                    class="w-full py-3 bg-amber-100 hover:bg-amber-200 text-amber-700 dark:bg-amber-900/40 dark:hover:bg-amber-900/60 dark:text-amber-400 font-bold rounded-xl transition border border-amber-200 dark:border-amber-800 text-sm mb-4 active:scale-95 flex items-center justify-center">
+                                    <i class="fa-solid fa-plus mr-2"></i> Add Lent Entry
+                                </button>
+                                <div
+                                    class="border-t border-amber-200 dark:border-amber-800 pt-3 flex justify-between items-center mt-auto">
+                                    <span
+                                        class="text-[10px] sm:text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider">Total
+                                        Lent</span>
+                                    <span class="text-xl sm:text-2xl font-black text-amber-600 dark:text-amber-400">₹<span
+                                            id="d2d-lent-sum">0</span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 8. Matching & Submit -->
+                <div id="d2d-matching-container"
+                    class="p-5 sm:p-6 rounded-2xl shadow-xl border-2 transition-colors duration-300 backdrop-blur-xl bg-white/60 dark:bg-gray-800/60 border border-white/50 dark:border-white/10 border-gray-200 dark:border-gray-700">
+                    <h3 class="font-black text-xl mb-6 text-center tracking-wide"><i
+                            class="fa-solid fa-scale-balanced text-primary mr-2"></i>Reconciliation Engine</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 text-center mb-6 sm:mb-8">
+                        <div
+                            class="p-4 bg-white/20 dark:bg-gray-800/30 backdrop-blur-xl border-t border-white/20 dark:border-white/10 rounded-2xl border border-gray-100 dark:border-gray-600 flex flex-col justify-center">
+                            <div class="text-[10px] sm:text-xs text-gray-500 uppercase font-black tracking-wider">
+                                Required Cash</div>
+                            <div class="text-xl sm:text-2xl font-black mt-1">₹<span id="d2d-matching-expected">0</span>
+                            </div>
+                            <div
+                                class="text-[10px] font-bold text-gray-400 mt-2 backdrop-blur-xl bg-white/60 dark:bg-gray-800/60 border border-white/50 dark:border-white/10 py-1 rounded inline-block px-2 self-center">
+                                (Sale - Online - Exp - Lent)</div>
+                        </div>
+                        <div
+                            class="p-4 bg-white/20 dark:bg-gray-800/30 backdrop-blur-xl border-t border-white/20 dark:border-white/10 rounded-2xl border border-gray-100 dark:border-gray-600 flex flex-col justify-center">
+                            <div class="text-[10px] sm:text-xs text-gray-500 uppercase font-black tracking-wider">
+                                Physical Cash</div>
+                            <div class="text-xl sm:text-2xl font-black mt-1">₹<span id="d2d-cash-in-hand">0</span>
+                            </div>
+                            <div
+                                class="text-[10px] font-bold text-gray-400 mt-2 backdrop-blur-xl bg-white/60 dark:bg-gray-800/60 border border-white/50 dark:border-white/10 py-1 rounded inline-block px-2 self-center">
+                                (From Cash Drops)</div>
+                        </div>
+                        <div class="p-4 rounded-2xl transition-colors duration-300 flex flex-col justify-center"
+                            id="d2d-diff-box">
+                            <div
+                                class="text-[10px] sm:text-xs uppercase font-black tracking-wider text-inherit opacity-80">
+                                Variance</div>
+                            <div class="text-2xl sm:text-3xl font-black mt-1">₹<span id="d2d-final-diff">0</span>
+                            </div>
+                            <div class="text-[10px] sm:text-xs font-black uppercase mt-2 px-3 py-1 bg-white/30 rounded-full inline-block mx-auto self-center"
+                                id="d2d-diff-label">Matched</div>
+                        </div>
+                    </div>
+
+                    <div id="d2d-action-container"
+                        class="flex flex-col sm:flex-row gap-3 sm:gap-4 border-t pt-5 sm:pt-6 border-gray-200 dark:border-gray-700">
+                        <button type="button" onclick="saveD2DDraft()"
+                            class="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-white py-4 px-6 rounded-xl font-black text-base sm:text-lg shadow-lg shadow-amber-500/30 transition-all active:scale-[0.98] flex items-center justify-center">
+                            <i class="fa-solid fa-file-pen mr-2 text-xl"></i> Save as Draft
+                        </button>
+
+                        <button type="button" onclick="submitD2DEntry()"
+                            class="w-full sm:flex-1 bg-primary hover:bg-blue-700 text-white py-4 rounded-xl font-black text-base sm:text-lg shadow-lg shadow-blue-500/30 transition-all active:scale-[0.98] flex items-center justify-center">
+                            <i class="fa-solid fa-paper-plane mr-2 text-xl"></i> Save & Submit
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </section>
+
         <!-- ================= SHIFT DETAILS VIEW ================= -->
         <section id="shift-details-view" class="view-section">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
@@ -1533,9 +2184,11 @@
         let state = {
             users: JSON.parse(localStorage.getItem('sfs_users')) || [],
             shifts: JSON.parse(localStorage.getItem('sfs_shifts')) || [],
+            d2dShifts: JSON.parse(localStorage.getItem('sfs_d2d_shifts')) || [],
             attendance: JSON.parse(localStorage.getItem('sfs_attendance')) || [],
             downloads: JSON.parse(localStorage.getItem('sfs_downloads')) || [],
             drafts: JSON.parse(localStorage.getItem('sfs_drafts')) || [],
+            d2dDrafts: JSON.parse(localStorage.getItem('sfs_d2d_drafts')) || [],
             fuelRates: JSON.parse(localStorage.getItem('sfs_fuelRates')) || { hsd: 90.00, ms: 96.50 }
         };
 
@@ -1549,9 +2202,11 @@
         async function saveState() {
             localStorage.setItem('sfs_users', JSON.stringify(state.users));
             localStorage.setItem('sfs_shifts', JSON.stringify(state.shifts));
+            localStorage.setItem('sfs_d2d_shifts', JSON.stringify(state.d2dShifts));
             localStorage.setItem('sfs_attendance', JSON.stringify(state.attendance));
             localStorage.setItem('sfs_downloads', JSON.stringify(state.downloads));
             localStorage.setItem('sfs_drafts', JSON.stringify(state.drafts));
+            localStorage.setItem('sfs_d2d_drafts', JSON.stringify(state.d2dDrafts));
             localStorage.setItem('sfs_fuelRates', JSON.stringify(state.fuelRates));
 
             // Cleanup legacy un-arrayed draft if it exists in local storage to free space
@@ -1564,6 +2219,7 @@
                     await window.setDoc(window.doc(window.db, "sfs_production", "app_state"), {
                         users: state.users,
                         shifts: state.shifts,
+                        d2dShifts: state.d2dShifts,
                         attendance: state.attendance,
                         downloads: state.downloads,
                         drafts: state.drafts
@@ -1574,6 +2230,423 @@
             }
         }
 
+        // ================= DAY 2 DAY LOGIC =================
+        let loadedD2DDraftId = null;
+
+        window.openD2DEntry = function (draftId = null, isViewMode = false) {
+            navigate('d2d-entry-view');
+            loadedD2DDraftId = draftId;
+            document.getElementById('d2d-date-display').textContent = new Date().toDateString();
+            document.getElementById('d2d-form').reset();
+            
+            // Handle View-Only mode visuals
+            const formElements = document.getElementById('d2d-form').querySelectorAll('input, select, button');
+            formElements.forEach(el => el.disabled = isViewMode);
+            const actionContainer = document.getElementById('d2d-action-container');
+            if(actionContainer) {
+                actionContainer.style.display = isViewMode ? 'none' : 'flex';
+            }
+
+
+            const staffSelect = document.getElementById('d2d-staff-select');
+            staffSelect.innerHTML = '';
+            state.users.forEach(u => {
+                if (u.role === 'manager') { // Focus on managers
+                    const opt = document.createElement('option');
+                    opt.value = u.id;
+                    opt.textContent = `${u.name}`;
+                    staffSelect.appendChild(opt);
+                }
+            });
+
+            if(document.getElementById('d2d-disp-hsd-rate')) document.getElementById('d2d-disp-hsd-rate').textContent = state.fuelRates.hsd;
+            if(document.getElementById('d2d-disp-ms-rate')) document.getElementById('d2d-disp-ms-rate').textContent = state.fuelRates.ms;
+            document.getElementById('d2d-rate-hsd').value = state.fuelRates.hsd;
+            document.getElementById('d2d-rate-ms').value = state.fuelRates.ms;
+
+            // clear containers
+            document.getElementById('d2d-expenses-container').innerHTML = '';
+            document.getElementById('d2d-lent-container').innerHTML = '';
+            document.getElementById('d2d-cashdrop-container').innerHTML = '';
+
+            if (draftId) {
+                // LOAD DRAFT
+                const draft = state.d2dDrafts.find(d => d.id === draftId) || state.d2dShifts.find(d => d.id === draftId);
+                if (draft) {
+                    document.getElementById('d2d-date').value = draft.date || new Date().toISOString().split('T')[0];
+                    if (draft.staffId) document.getElementById('d2d-staff-select').value = draft.staffId;
+
+                    const dr = draft.raw || {};
+                    const m1 = dr.m1 || {};
+                    const m2 = dr.m2 || {};
+
+                    document.getElementById('d2d-m1-on1').value = m1.on1 || ''; document.getElementById('d2d-m1-cn1').value = m1.cn1 || '';
+                    document.getElementById('d2d-m1-on2').value = m1.on2 || ''; document.getElementById('d2d-m1-cn2').value = m1.cn2 || '';
+                    document.getElementById('d2d-m1-on3').value = m1.on3 || ''; document.getElementById('d2d-m1-cn3').value = m1.cn3 || '';
+                    document.getElementById('d2d-m1-on4').value = m1.on4 || ''; document.getElementById('d2d-m1-cn4').value = m1.cn4 || '';
+
+                    document.getElementById('d2d-m2-on1').value = m2.on1 || ''; document.getElementById('d2d-m2-cn1').value = m2.cn1 || '';
+                    document.getElementById('d2d-m2-on2').value = m2.on2 || ''; document.getElementById('d2d-m2-cn2').value = m2.cn2 || '';
+                    document.getElementById('d2d-m2-on3').value = m2.on3 || ''; document.getElementById('d2d-m2-cn3').value = m2.cn3 || '';
+                    document.getElementById('d2d-m2-on4').value = m2.on4 || ''; document.getElementById('d2d-m2-cn4').value = m2.cn4 || '';
+
+                    if (dr.testing) {
+                        document.getElementById('d2d-testing-hsd').value = dr.testing.hsd || '';
+                        document.getElementById('d2d-testing-ms').value = dr.testing.ms || '';
+                    }
+
+                    if (dr.onlineGateways) {
+                        document.getElementById('d2d-online-card').value = dr.onlineGateways.card || '';
+                        document.getElementById('d2d-online-paytm').value = dr.onlineGateways.paytm || '';
+                        document.getElementById('d2d-online-gpay').value = dr.onlineGateways.gpay || '';
+                        document.getElementById('d2d-online-gpay2').value = dr.onlineGateways.gpay2 || '';
+                    }
+
+                    if (dr.cashDrops && dr.cashDrops.length > 0) {
+                        dr.cashDrops.forEach(amt => { addD2DCashRow(); const inps = document.querySelectorAll('.d2d-cash-amt'); inps[inps.length - 1].value = amt; });
+                    } else { addD2DCashRow(); addD2DCashRow(); addD2DCashRow(); }
+
+                    if (draft.financials && draft.financials.expenseDetails && draft.financials.expenseDetails.length > 0) {
+                        draft.financials.expenseDetails.forEach(exp => {
+                            addD2DExpenseRow();
+                            const rInps = document.querySelectorAll('.d2d-exp-reason');
+                            const aInps = document.querySelectorAll('.d2d-exp-amt');
+                            rInps[rInps.length - 1].value = exp.reason;
+                            aInps[aInps.length - 1].value = exp.amount;
+                        });
+                    } else { addD2DExpenseRow(); }
+
+                    if (draft.financials && draft.financials.lentDetails && draft.financials.lentDetails.length > 0) {
+                        draft.financials.lentDetails.forEach(lt => {
+                            addD2DLentRow();
+                            const rInps = document.querySelectorAll('.d2d-lent-party');
+                            const aInps = document.querySelectorAll('.d2d-lent-amt');
+                            rInps[rInps.length - 1].value = lt.name;
+                            aInps[aInps.length - 1].value = lt.amount;
+                        });
+                    } else { addD2DLentRow(); }
+                }
+            } else {
+                document.getElementById('d2d-date').value = new Date().toISOString().split('T')[0];
+                // Add initial empty rows
+                addD2DExpenseRow();
+                addD2DLentRow();
+                addD2DCashRow();
+                addD2DCashRow();
+                addD2DCashRow();
+
+                // PRE-FILL LOGIC: Get last D2D entry
+                if (state.d2dShifts && state.d2dShifts.length > 0) {
+                    const sortedLine = [...state.d2dShifts].sort((a, b) => new Date(a.date) - new Date(b.date));
+                    const last = sortedLine[sortedLine.length - 1];
+                    if (last.raw && last.raw.m1 && last.raw.m2) {
+                        document.getElementById('d2d-m1-on1').value = last.raw.m1.cn1 || '';
+                        document.getElementById('d2d-m1-on2').value = last.raw.m1.cn2 || '';
+                        document.getElementById('d2d-m1-on3').value = last.raw.m1.cn3 || '';
+                        document.getElementById('d2d-m1-on4').value = last.raw.m1.cn4 || '';
+                        document.getElementById('d2d-m2-on1').value = last.raw.m2.cn1 || '';
+                        document.getElementById('d2d-m2-on2').value = last.raw.m2.cn2 || '';
+                        document.getElementById('d2d-m2-on3').value = last.raw.m2.cn3 || '';
+                        document.getElementById('d2d-m2-on4').value = last.raw.m2.cn4 || '';
+                    }
+                }
+            }
+
+            calcD2DTotals();
+        };
+
+        window.cancelD2DEntry = function () {
+            if (confirm("Discard Day 2 Day entry?")) navigate('manager-dashboard');
+        };
+
+        window.updateD2DCashRowNumbers = function() {
+            const container = document.getElementById('d2d-cashdrop-container');
+            Array.from(container.children).forEach((row, idx) => {
+                row.children[0].textContent = idx + 1;
+            });
+        };
+        window.addD2DCashRow = function () {
+            const container = document.getElementById('d2d-cashdrop-container');
+            const row = document.createElement('div');
+            row.className = 'flex items-center gap-2 sm:gap-3 bg-gray-50 dark:bg-gray-900/50 p-2 sm:p-3 rounded-xl border border-gray-100 dark:border-gray-700 animate-fade-in group relative overflow-hidden';
+            row.innerHTML = `
+                <div class="w-8 sm:w-10 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 font-black rounded-lg py-2 flex items-center justify-center text-xs sm:text-sm"></div>
+                <div class="flex-1 relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <span class="text-emerald-600 dark:text-emerald-400 font-black text-sm">₹</span>
+                    </div>
+                    <input type="number" placeholder="Amt" class="d2d-cash-amt calc-d2d w-full pl-7 p-2.5 bg-white border border-gray-200 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 text-sm font-black text-emerald-800 dark:bg-gray-800 dark:border-gray-600 dark:text-emerald-400 shadow-inner" oninput="calcD2DTotals()">
+                </div>
+                <button type="button" onclick="this.parentElement.remove(); window.updateD2DCashRowNumbers(); calcD2DTotals();" class="text-red-400 hover:text-red-600 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/40 transition">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            `;
+            container.appendChild(row);
+            window.updateD2DCashRowNumbers();
+        };
+
+        window.addD2DExpenseRow = function () {
+            const container = document.getElementById('d2d-expenses-container');
+            const row = document.createElement('div');
+            row.className = 'flex items-center gap-2 animate-fade-in bg-white dark:bg-gray-800 p-2 rounded-lg border border-red-100 dark:border-red-900/50 shadow-sm';
+            row.innerHTML = `
+                <div class="flex-1 relative">
+                    <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-gray-400">
+                        <i class="fa-solid fa-tag text-[10px] sm:text-xs text-red-500/70"></i>
+                    </div>
+                    <input type="text" placeholder="Reason" class="d2d-exp-reason w-full pl-8 p-2.5 text-base sm:text-sm font-bold border border-gray-200 rounded-lg focus:ring-red-500 focus:border-red-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 bg-white">
+                </div>
+                <div class="w-1/3 min-w-[100px] relative">
+                    <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+                        <span class="text-gray-400 font-black text-xs sm:text-sm">₹</span>
+                    </div>
+                    <input type="number" placeholder="Amt" class="d2d-exp-amt calc-d2d w-full pl-6 p-2.5 text-base sm:text-sm font-bold border border-red-200 rounded-lg focus:ring-red-500 focus:border-red-500 dark:bg-gray-800 dark:border-red-800 text-red-600 bg-white" oninput="calcD2DTotals()">
+                </div>
+                <button type="button" onclick="this.parentElement.remove(); calcD2DTotals();" class="p-2.5 text-red-400 hover:text-red-600 hover:bg-red-100 rounded-lg transition dark:hover:bg-red-900/50 flex-shrink-0">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            `;
+            container.appendChild(row);
+        };
+
+        window.addD2DLentRow = function () {
+            const container = document.getElementById('d2d-lent-container');
+            const row = document.createElement('div');
+            row.className = 'flex items-center gap-2 animate-fade-in bg-white dark:bg-gray-800 p-2 rounded-lg border border-amber-100 dark:border-amber-900/50 shadow-sm';
+            row.innerHTML = `
+                <div class="flex-1 relative">
+                    <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-gray-400">
+                        <i class="fa-solid fa-user text-[10px] sm:text-xs text-amber-500/70"></i>
+                    </div>
+                    <input type="text" placeholder="Party Name" class="d2d-lent-party w-full pl-8 p-2.5 text-base sm:text-sm font-bold border border-gray-200 rounded-lg focus:ring-amber-500 focus:border-amber-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 bg-white">
+                </div>
+                <div class="w-1/3 min-w-[100px] relative">
+                    <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+                        <span class="text-gray-400 font-black text-xs sm:text-sm">₹</span>
+                    </div>
+                    <input type="number" placeholder="Amt" class="d2d-lent-amt calc-d2d w-full pl-6 p-2.5 text-base sm:text-sm font-bold border border-amber-200 rounded-lg focus:ring-amber-500 focus:border-amber-500 dark:bg-gray-800 dark:border-amber-800 text-amber-600 bg-white" oninput="calcD2DTotals()">
+                </div>
+                <button type="button" onclick="this.parentElement.remove(); calcD2DTotals();" class="p-2.5 text-amber-400 hover:text-amber-600 hover:bg-amber-100 rounded-lg transition dark:hover:bg-amber-900/50 flex-shrink-0">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            `;
+            container.appendChild(row);
+        };
+
+        window.calcD2DTotals = function () {
+            const getVal = (id) => parseFloat(document.getElementById(id).value) || 0;
+            const setVal = (id, val) => document.getElementById(id).textContent = val.toFixed(2);
+
+            // Fuel Maths M1
+            const m1_tn1 = Math.max(0, getVal('d2d-m1-cn1') - getVal('d2d-m1-on1')); setVal('d2d-m1-tn1', m1_tn1);
+            const m1_tn2 = Math.max(0, getVal('d2d-m1-cn2') - getVal('d2d-m1-on2')); setVal('d2d-m1-tn2', m1_tn2);
+            const m1_tn3 = Math.max(0, getVal('d2d-m1-cn3') - getVal('d2d-m1-on3')); setVal('d2d-m1-tn3', m1_tn3);
+            const m1_tn4 = Math.max(0, getVal('d2d-m1-cn4') - getVal('d2d-m1-on4')); setVal('d2d-m1-tn4', m1_tn4);
+            
+            const m1_hsd = m1_tn1 + m1_tn2; setVal('d2d-m1-total-hsd', m1_hsd);
+            const m1_ms = m1_tn3 + m1_tn4; setVal('d2d-m1-total-ms', m1_ms);
+
+            // Fuel Maths M2
+            const m2_tn1 = Math.max(0, getVal('d2d-m2-cn1') - getVal('d2d-m2-on1')); setVal('d2d-m2-tn1', m2_tn1);
+            const m2_tn2 = Math.max(0, getVal('d2d-m2-cn2') - getVal('d2d-m2-on2')); setVal('d2d-m2-tn2', m2_tn2);
+            const m2_tn3 = Math.max(0, getVal('d2d-m2-cn3') - getVal('d2d-m2-on3')); setVal('d2d-m2-tn3', m2_tn3);
+            const m2_tn4 = Math.max(0, getVal('d2d-m2-cn4') - getVal('d2d-m2-on4')); setVal('d2d-m2-tn4', m2_tn4);
+            
+            const m2_hsd = m2_tn1 + m2_tn2; setVal('d2d-m2-total-hsd', m2_hsd);
+            const m2_ms = m2_tn3 + m2_tn4; setVal('d2d-m2-total-ms', m2_ms);
+
+            // Gross Totals
+            const grossHsd = m1_hsd + m2_hsd;
+            const grossMs = m1_ms + m2_ms;
+
+            // Net Volumes
+            const netHsd = Math.max(0, grossHsd - getVal('d2d-testing-hsd'));
+            const netMs = Math.max(0, grossMs - getVal('d2d-testing-ms'));
+            document.getElementById('d2d-final-hsd').textContent = netHsd.toFixed(2);
+            document.getElementById('d2d-final-ms').textContent = netMs.toFixed(2);
+
+            // Expected Cash
+            const expectedHsdCash = netHsd * state.fuelRates.hsd;
+            const expectedMsCash = netMs * state.fuelRates.ms;
+            document.getElementById('d2d-cash-hsd').textContent = Math.round(expectedHsdCash);
+            document.getElementById('d2d-cash-ms').textContent = Math.round(expectedMsCash);
+
+            const expectedSale = expectedHsdCash + expectedMsCash;
+            document.getElementById('d2d-expected-sale').textContent = Math.round(expectedSale);
+
+            // Collections
+            let shiftCashSum = 0;
+            document.querySelectorAll('.d2d-cash-amt').forEach(el => shiftCashSum += (parseFloat(el.value) || 0));
+            document.getElementById('d2d-shiftcash-sum').textContent = Math.round(shiftCashSum);
+
+            const onlineSum = getVal('d2d-online-card') + getVal('d2d-online-paytm') + getVal('d2d-online-gpay') + getVal('d2d-online-gpay2');
+            document.getElementById('d2d-online-sum').textContent = Math.round(onlineSum);
+
+            const cashInHand = shiftCashSum; // Only physical cash
+            document.getElementById('d2d-cash-in-hand').textContent = Math.round(cashInHand);
+
+            // Deductions
+            let expSum = 0;
+            document.querySelectorAll('.d2d-exp-amt').forEach(el => expSum += (parseFloat(el.value) || 0));
+            document.getElementById('d2d-expense-sum').textContent = Math.round(expSum);
+
+            let lentSum = 0;
+            document.querySelectorAll('.d2d-lent-amt').forEach(el => lentSum += (parseFloat(el.value) || 0));
+            document.getElementById('d2d-lent-sum').textContent = Math.round(lentSum);
+
+            // Matching Logic
+            // Required Cash = (Sale - Online payments) - (Expenses + Lent)
+            const requiredCash = expectedSale - onlineSum - expSum - lentSum;
+            document.getElementById('d2d-matching-expected').textContent = Math.round(requiredCash);
+
+            const diff = cashInHand - requiredCash;
+            const diffDisplay = Math.round(diff);
+            document.getElementById('d2d-final-diff').textContent = Math.abs(diffDisplay);
+
+            const diffBox = document.getElementById('d2d-diff-box');
+            const diffLabel = document.getElementById('d2d-diff-label');
+
+            diffBox.className = 'p-4 rounded-2xl transition-colors duration-300 flex flex-col justify-center color-current ';
+            if (diffDisplay === 0) {
+                diffBox.classList.add('bg-green-100', 'text-green-800', 'dark:bg-green-900/40', 'dark:text-green-300');
+                diffLabel.textContent = 'Matched';
+                diffLabel.className = 'text-[10px] sm:text-xs font-black uppercase mt-2 px-3 py-1 bg-green-200/50 dark:bg-green-800/50 rounded-full inline-block mx-auto self-center';
+            } else if (diffDisplay > 0) {
+                diffBox.classList.add('bg-blue-100', 'text-blue-800', 'dark:bg-blue-900/40', 'dark:text-blue-300');
+                diffLabel.textContent = 'Excess';
+                diffLabel.className = 'text-[10px] sm:text-xs font-black uppercase mt-2 px-3 py-1 bg-blue-200/50 dark:bg-blue-800/50 rounded-full inline-block mx-auto self-center';
+            } else {
+                diffBox.classList.add('bg-red-100', 'text-red-800', 'dark:bg-red-900/40', 'dark:text-red-300');
+                diffLabel.textContent = 'Shortage';
+                diffLabel.className = 'text-[10px] sm:text-xs font-black uppercase mt-2 px-3 py-1 bg-red-200/50 dark:bg-red-800/50 rounded-full inline-block mx-auto self-center';
+            }
+        };
+
+        window.getD2DDataPayload = function () {
+            const staffId = document.getElementById('d2d-staff-select').value;
+            const staffOpt = document.getElementById('d2d-staff-select').options[document.getElementById('d2d-staff-select').selectedIndex];
+            const staffName = staffOpt ? staffOpt.text : 'Unknown';
+            const dateVal = document.getElementById('d2d-date').value;
+
+            const getVal = (id) => parseFloat(document.getElementById(id).value) || 0;
+
+            const m1_tn1 = Math.max(0, getVal('d2d-m1-cn1') - getVal('d2d-m1-on1'));
+            const m1_tn2 = Math.max(0, getVal('d2d-m1-cn2') - getVal('d2d-m1-on2'));
+            const m1_tn3 = Math.max(0, getVal('d2d-m1-cn3') - getVal('d2d-m1-on3'));
+            const m1_tn4 = Math.max(0, getVal('d2d-m1-cn4') - getVal('d2d-m1-on4'));
+
+            const m2_tn1 = Math.max(0, getVal('d2d-m2-cn1') - getVal('d2d-m2-on1'));
+            const m2_tn2 = Math.max(0, getVal('d2d-m2-cn2') - getVal('d2d-m2-on2'));
+            const m2_tn3 = Math.max(0, getVal('d2d-m2-cn3') - getVal('d2d-m2-on3'));
+            const m2_tn4 = Math.max(0, getVal('d2d-m2-cn4') - getVal('d2d-m2-on4'));
+
+            const netHsd = Math.max(0, (m1_tn1 + m1_tn2 + m2_tn1 + m2_tn2) - getVal('d2d-testing-hsd'));
+            const netMs = Math.max(0, (m1_tn3 + m1_tn4 + m2_tn3 + m2_tn4) - getVal('d2d-testing-ms'));
+            const expectedSale = (netHsd * state.fuelRates.hsd) + (netMs * state.fuelRates.ms);
+
+            let shiftCash = 0;
+            const cashDrops = [];
+            document.querySelectorAll('.d2d-cash-amt').forEach(el => {
+                const a = parseFloat(el.value);
+                if (a) cashDrops.push(a);
+                shiftCash += (a || 0);
+            });
+
+            const online = getVal('d2d-online-card') + getVal('d2d-online-paytm') + getVal('d2d-online-gpay') + getVal('d2d-online-gpay2');
+
+            const expenseDetails = [];
+            document.querySelectorAll('.d2d-exp-reason').forEach((el, index) => {
+                const amtEl = document.querySelectorAll('.d2d-exp-amt')[index];
+                if (el.value.trim() && parseFloat(amtEl.value) > 0) expenseDetails.push({ reason: el.value.trim(), amount: parseFloat(amtEl.value) });
+            });
+            const lentDetails = [];
+            document.querySelectorAll('.d2d-lent-party').forEach((el, index) => {
+                const amtEl = document.querySelectorAll('.d2d-lent-amt')[index];
+                if (el.value.trim() && parseFloat(amtEl.value) > 0) lentDetails.push({ name: el.value.trim(), amount: parseFloat(amtEl.value) });
+            });
+
+            const expenses = expenseDetails.reduce((a, b) => a + b.amount, 0);
+            const lent = lentDetails.reduce((a, b) => a + b.amount, 0);
+            const diff = (shiftCash + online + expenses + lent) - expectedSale;
+
+            return {
+                id: loadedD2DDraftId ? loadedD2DDraftId.replace('draft_', 'd2d_') : 'd2d_' + Date.now(),
+                date: new Date(dateVal).toISOString(),
+                shiftType: 'Full Day',
+                staffId,
+                staffName,
+                rates: { hsd: state.fuelRates.hsd, ms: state.fuelRates.ms },
+                saleInfo: { hsdVol: netHsd, msVol: netMs, totalSale: expectedSale },
+                financials: { online, cash: shiftCash, expenses, lent, difference: diff, expenseDetails, lentDetails },
+                raw: {
+                    m1: {
+                        on1: getVal('d2d-m1-on1'), cn1: getVal('d2d-m1-cn1'),
+                        on2: getVal('d2d-m1-on2'), cn2: getVal('d2d-m1-cn2'),
+                        on3: getVal('d2d-m1-on3'), cn3: getVal('d2d-m1-cn3'),
+                        on4: getVal('d2d-m1-on4'), cn4: getVal('d2d-m1-cn4')
+                    },
+                    m2: {
+                        on1: getVal('d2d-m2-on1'), cn1: getVal('d2d-m2-cn1'),
+                        on2: getVal('d2d-m2-on2'), cn2: getVal('d2d-m2-cn2'),
+                        on3: getVal('d2d-m2-on3'), cn3: getVal('d2d-m2-cn3'),
+                        on4: getVal('d2d-m2-on4'), cn4: getVal('d2d-m2-cn4')
+                    },
+                    testing: { hsd: getVal('d2d-testing-hsd'), ms: getVal('d2d-testing-ms') },
+                    cashDrops: cashDrops,
+                    onlineGateways: { card: getVal('d2d-online-card'), paytm: getVal('d2d-online-paytm'), gpay: getVal('d2d-online-gpay'), gpay2: getVal('d2d-online-gpay2') }
+                }
+            };
+        };
+
+        window.submitD2DEntry = function (e) {
+            if(e) e.preventDefault();
+            processD2DSave(false);
+        };
+
+        window.processD2DSave = function (isDraft) {
+            if (!document.getElementById('d2d-date').value) return showToast("Select date", "error");
+
+            const payload = getD2DDataPayload();
+
+            if (isDraft) {
+                payload.id = payload.id.replace('d2d_', 'draft_d2d_');
+                payload.isDraft = true;
+
+                if (loadedD2DDraftId) {
+                    const idx = state.d2dDrafts.findIndex(d => d.id === loadedD2DDraftId);
+                    if (idx > -1) state.d2dDrafts[idx] = payload;
+                    else state.d2dDrafts.push(payload);
+                } else {
+                    state.d2dDrafts.push(payload);
+                }
+
+                saveState();
+                showToast('Master Summary saved as Draft!', 'success');
+                navigate('manager-dashboard');
+                return;
+            }
+
+            // Delete draft if it was a draft or overwrite old shift
+            if (loadedD2DDraftId) {
+                state.d2dDrafts = state.d2dDrafts.filter(d => d.id !== loadedD2DDraftId);
+                state.d2dShifts = state.d2dShifts.filter(d => d.id !== loadedD2DDraftId);
+            }
+
+            // Fallback safety to ensure no duplicates of the exact new payload ID
+            state.d2dShifts = state.d2dShifts.filter(d => d.id !== payload.id);
+            
+            state.d2dShifts.push(payload);
+            saveState();
+            showToast("Master Reconciliation Saved!", "success");
+            navigate('manager-dashboard');
+            document.getElementById('filter-mode').value = 'detailed';
+            renderReports();
+        };
+
+        window.saveD2DDraft = function () {
+            processD2DSave(true);
+        };
+        // Modify deleteShift, viewShiftDetails, openDownloadModal, editShift to guard against d2d 
         // ================= UI HELPERS =================
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
@@ -1844,13 +2917,15 @@
         window.renderDraftsList = function () {
             const list = document.getElementById('drafts-list');
             list.innerHTML = '';
+            
+            const allDrafts = [...state.drafts, ...(state.d2dDrafts || [])].sort((a,b) => b.timestamp - a.timestamp);
 
-            if (state.drafts.length === 0) {
+            if (allDrafts.length === 0) {
                 list.innerHTML = '<li class="p-8 text-center text-gray-500 font-medium">No saved drafts available.</li>';
                 return;
             }
 
-            state.drafts.forEach(d => {
+            allDrafts.forEach(d => {
                 const li = document.createElement('li');
                 li.className = 'p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition';
 
@@ -1963,6 +3038,11 @@
         };
 
         window.editShift = function (id) {
+            if (id.startsWith('d2d_')) {
+                openD2DEntry(id);
+                showToast('D2D Editing Mode Active', 'info');
+                return;
+            }
             const s = state.shifts.find(x => x.id === id);
             if (!s) return;
 
@@ -2071,6 +3151,7 @@
         window.deleteDraft = function (id) {
             if (confirm("Delete this draft permanently?")) {
                 state.drafts = state.drafts.filter(x => x.id !== id);
+                if(state.d2dDrafts) state.d2dDrafts = state.d2dDrafts.filter(x => x.id !== id);
                 saveState();
                 renderDraftsList();
             }
@@ -2090,8 +3171,8 @@
             document.getElementById('shift-form').reset();
 
             // Load globally persisting locked rates
-            document.getElementById('inp-rate-hsd').value = state.fuelRates.hsd.toFixed(2);
-            document.getElementById('inp-rate-ms').value = state.fuelRates.ms.toFixed(2);
+            document.getElementById('inp-rate-hsd').value = (Number(state.fuelRates.hsd) || 0).toFixed(2);
+            document.getElementById('inp-rate-ms').value = (Number(state.fuelRates.ms) || 0).toFixed(2);
 
             document.getElementById('expense-list-container').innerHTML = '';
             document.getElementById('lent-list-container').innerHTML = '';
@@ -2117,12 +3198,12 @@
                     name: row.querySelector('.lent-name').value,
                     amount: row.querySelector('.lent-amount').value
                 });
-                const salary = [];
-                document.querySelectorAll('.salary-row').forEach(row => {
-                    salary.push({
-                        name: row.querySelector('.salary-name').value,
-                        amount: row.querySelector('.salary-amount').value
-                    });
+            });
+            const salary = [];
+            document.querySelectorAll('.salary-row').forEach(row => {
+                salary.push({
+                    name: row.querySelector('.salary-name').value,
+                    amount: row.querySelector('.salary-amount').value
                 });
             });
 
@@ -2394,33 +3475,33 @@
             const amtMS = finalMS * rateMS;
             const totalSale = amtHSD + amtMS;
 
-            setTxt('calc-hsd-amt', amtHSD);
-            setTxt('calc-ms-amt', amtMS);
-            setTxt('calc-total-sale', totalSale);
+            document.getElementById('calc-hsd-amt').textContent = parseFloat(amtHSD).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('calc-ms-amt').textContent = parseFloat(amtMS).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('calc-total-sale').textContent = parseFloat(totalSale).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
             const online = getVal('inp-online-card') + getVal('inp-online-paytm') + getVal('inp-online-gpay1') + getVal('inp-online-gpay2');
-            setTxt('calc-online-total', online);
+            document.getElementById('calc-online-total').textContent = parseFloat(online).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
             // Compute Total Expenses
             let expenses = 0;
             document.querySelectorAll('.expense-amount').forEach(inp => {
                 expenses += parseFloat(inp.value) || 0;
             });
-            setTxt('calc-total-expenses', expenses);
+            document.getElementById('calc-total-expenses').textContent = parseFloat(expenses).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
             // Compute Total Salary
             let salary = 0;
             document.querySelectorAll('.salary-amount').forEach(inp => {
                 salary += parseFloat(inp.value) || 0;
             });
-            setTxt('calc-total-salary', salary);
+            document.getElementById('calc-total-salary').textContent = parseFloat(salary).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
             // Compute Total Lent
             let lent = 0;
             document.querySelectorAll('.lent-amount').forEach(inp => {
                 lent += parseFloat(inp.value) || 0;
             });
-            setTxt('calc-total-lent', lent);
+            document.getElementById('calc-total-lent').textContent = parseFloat(lent).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
             const c500 = getVal('cash-500') * 500;
             const c200 = getVal('cash-200') * 200;
@@ -2431,11 +3512,11 @@
             const coins = getVal('cash-coins');
 
             const cashTotal = c500 + c200 + c100 + c50 + c20 + c10 + coins;
-            setTxt('calc-cash-total', cashTotal);
-            setTxt('calc-actual-display', cashTotal);
+            document.getElementById('calc-cash-total').textContent = parseFloat(cashTotal).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('calc-actual-display').textContent = parseFloat(cashTotal).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
             const expectedCash = totalSale - online - expenses - lent - salary;
-            setTxt('calc-expected-cash', expectedCash);
+            document.getElementById('calc-expected-cash').textContent = parseFloat(expectedCash).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
             const difference = cashTotal - expectedCash;
             const diffEl = document.getElementById('calc-difference');
@@ -2652,6 +3733,15 @@
 
         // Delete Shift
         window.deleteShift = async function (id) {
+            if (id.startsWith('d2d_')) {
+                if (confirm("Are you sure you want to permanently delete this D2D record?")) {
+                    state.d2dShifts = state.d2dShifts.filter(s => s.id !== id);
+                    saveState();
+                    renderReports();
+                    showToast("Record deleted", "success");
+                }
+                return;
+            }
             if (confirm("Are you sure you want to permanently delete this report?")) {
                 state.shifts = state.shifts.filter(s => s.id !== id);
                 saveState(); // Will sync to firebase in background
@@ -2761,6 +3851,8 @@
         window.clearReportFilter = function () {
             document.getElementById('filter-date').value = '';
             document.getElementById('filter-staff').value = '';
+            const filterMode = document.getElementById('filter-mode');
+            if (filterMode) filterMode.value = 'summary';
             renderReports();
         }
 
@@ -2802,14 +3894,19 @@
             closeDownloadModal();
         };
 
+        
+        const fmtNum = (num, dec=2) => parseFloat(num || 0).toLocaleString('en-IN', { maximumFractionDigits: dec, minimumFractionDigits: dec });
+
         function renderReports() {
             const tbody = document.getElementById('reports-table-body');
             const emptyState = document.getElementById('reports-empty');
             const filterDate = document.getElementById('filter-date').value;
             const filterStaff = document.getElementById('filter-staff').value;
+            const filterMode = document.getElementById('filter-mode') ? document.getElementById('filter-mode').value : 'summary';
 
             tbody.innerHTML = '';
-            let filteredShifts = state.shifts.slice().reverse();
+            let sourceShifts = filterMode === 'detailed' ? state.d2dShifts : state.shifts;
+            let filteredShifts = sourceShifts.slice().reverse();
 
             if (currentUser && currentUser.role === 'staff') {
                 filteredShifts = filteredShifts.filter(s => s.staffId === currentUser.id);
@@ -2865,16 +3962,16 @@
             document.getElementById('sum-ms-vol').textContent = sumMsVol.toFixed(2);
             document.getElementById('sum-gross-vol').textContent = (sumHsdVol + sumMsVol).toFixed(2);
 
-            document.getElementById('sum-hsd-cash').textContent = '₹' + sumHsdCash.toFixed(2);
-            document.getElementById('sum-ms-cash').textContent = '₹' + sumMsCash.toFixed(2);
-            document.getElementById('sum-gross-cash').textContent = '₹' + (sumHsdCash + sumMsCash).toFixed(2);
+            document.getElementById('sum-hsd-cash').textContent = '₹' + fmtNum(sumHsdCash);
+            document.getElementById('sum-ms-cash').textContent = '₹' + fmtNum(sumMsCash);
+            document.getElementById('sum-gross-cash').textContent = '₹' + fmtNum(sumHsdCash + sumMsCash);
 
-            document.getElementById('sum-day-cash').textContent = '₹' + sumDayCash.toFixed(2);
-            document.getElementById('sum-online').textContent = '₹' + sumOnline.toFixed(2);
-            document.getElementById('sum-expense').textContent = '₹' + sumExpense.toFixed(2);
-            document.getElementById('sum-lent').textContent = '₹' + sumLent.toFixed(2);
+            document.getElementById('sum-day-cash').textContent = '₹' + fmtNum(sumDayCash);
+            document.getElementById('sum-online').textContent = '₹' + fmtNum(sumOnline);
+            document.getElementById('sum-expense').textContent = '₹' + fmtNum(sumExpense);
+            document.getElementById('sum-lent').textContent = '₹' + fmtNum(sumLent);
             if (document.getElementById('sum-salary')) document.getElementById('sum-salary').textContent = '₹' + sumSalary.toFixed(2);
-            document.getElementById('sum-total-ops').textContent = '₹' + (sumDayCash + sumOnline + sumExpense + sumLent).toFixed(2);
+            document.getElementById('sum-total-ops').textContent = '₹' + fmtNum(sumDayCash + sumOnline + sumExpense + sumLent);
 
             document.getElementById('daily-summary-dashboard').classList.remove('hidden');
 
@@ -2902,39 +3999,142 @@
                 }
             }
 
+            const thead = document.getElementById('reports-table-head');
+            if (thead) {
+                if (filterMode === 'detailed') {
+                    thead.innerHTML = `
+                        <tr>
+                            <th class="px-5 py-4">Date</th>
+                            <th class="px-5 py-4">Shift</th>
+                            <th class="px-5 py-4">Staff Member</th>
+                            <th class="px-5 py-4 text-right">Diesel (L)</th>
+                            <th class="px-5 py-4 text-right">Petrol (L)</th>
+                            <th class="px-5 py-4 text-right">Total Sale (₹)</th>
+                            <th class="px-5 py-4 text-right">Online (₹)</th>
+                            <th class="px-5 py-4 text-right">Cash (₹)</th>
+                            <th class="px-5 py-4 text-right">Expenses (₹)</th>
+                            <th class="px-5 py-4 text-right">Lent (₹)</th>
+                            <th class="px-5 py-4 text-right">Difference (₹)</th>
+                            <th class="px-5 py-4 text-center">Action</th>
+                        </tr>
+                    `;
+                } else {
+                    thead.innerHTML = `
+                        <tr>
+                            <th class="px-5 py-4">Date & Shift</th>
+                            <th class="px-5 py-4">Staff Member</th>
+                            <th class="px-5 py-4 text-right">Total Sale (₹)</th>
+                            <th class="px-5 py-4 text-right">Online (₹)</th>
+                            <th class="px-5 py-4 text-right">Cash (₹)</th>
+                            <th class="px-5 py-4 text-right">Expenses (₹)</th>
+                            <th class="px-5 py-4 text-right">Lent (₹)</th>
+                            <th class="px-5 py-4 text-right">Difference (₹)</th>
+                            <th class="px-5 py-4 text-center">Action</th>
+                        </tr>
+                    `;
+                }
+            }
+
             shiftsToDisplay.forEach(s => {
                 const tr = document.createElement('tr');
                 const dt = new Date(s.date).toLocaleDateString();
                 const diffColor = s.financials.difference === 0 ? 'text-green-600 dark:text-green-400' : (s.financials.difference < 0 ? 'text-red-600 dark:text-red-400' : 'text-yellow-600 dark:text-yellow-400');
+                const hsdVol = (s.saleInfo && s.saleInfo.hsdVol) ? s.saleInfo.hsdVol.toFixed(2) : '0.00';
+                const msVol = (s.saleInfo && s.saleInfo.msVol) ? s.saleInfo.msVol.toFixed(2) : '0.00';
 
-                tr.innerHTML = `
-                    <td class="px-5 py-4">
-                        <div class="font-bold text-gray-900 dark:text-gray-100">${dt}</div>
-                        <div class="text-xs text-gray-500 font-semibold">${s.shiftType}</div>
-                    </td>
-                    <td class="px-5 py-4 font-bold text-gray-800 dark:text-gray-200">${s.staffName}${s.duNumber ? ' <span class="text-xs font-normal text-gray-500">(' + s.duNumber + ')</span>' : ''}</td>
-                    <td class="px-5 py-4 text-right font-black text-gray-900 dark:text-gray-100">₹${s.saleInfo.totalSale.toFixed(2)}</td>
-                    <td class="px-5 py-4 text-right font-bold text-purple-600 dark:text-purple-400">₹${s.financials.online.toFixed(2)}</td>
-                    <td class="px-5 py-4 text-right font-bold text-emerald-600 dark:text-emerald-400">₹${s.financials.cash.toFixed(2)}</td>
-                    <td class="px-5 py-4 text-right font-bold text-red-500 dark:text-red-400">₹${(s.financials.expenses || 0).toFixed(2)}</td>
-                    <td class="px-5 py-4 text-right font-bold text-amber-500 dark:text-amber-400">₹${(s.financials.lent || 0).toFixed(2)}</td>
-                    <td class="px-5 py-4 text-right font-black ${diffColor}">₹${s.financials.difference.toFixed(2)}</td>
-                    <td class="px-5 py-4 text-center">
-                        <div class="flex items-center justify-center gap-2">
-                            <button onclick="viewShiftDetails('${s.id}')" class="bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 dark:text-blue-400 px-3 py-2 rounded-lg font-bold transition text-xs flex items-center gap-1.5 active:scale-95" title="View"><i class="fa-solid fa-eye"></i></button>
-                            <button onclick="editShift('${s.id}')" class="bg-amber-50 hover:bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 dark:text-amber-400 px-3 py-2 rounded-lg font-bold transition text-xs flex items-center gap-1.5 active:scale-95" title="Edit"><i class="fa-solid fa-pen"></i></button>
-                            <button onclick="openDownloadModal('${s.id}')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-300 px-3 py-2 rounded-lg font-bold transition text-xs flex items-center gap-1.5 active:scale-95" title="Download"><i class="fa-solid fa-download"></i></button>
-                            <button onclick="deleteShift('${s.id}')" class="bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-400 px-3 py-2 rounded-lg font-bold transition text-xs flex items-center gap-1.5 active:scale-95" title="Delete"><i class="fa-solid fa-trash-can"></i></button>
-                        </div>
-                    </td>
-                `;
+                if (filterMode === 'detailed') {
+                    tr.innerHTML = `
+                        <td class="px-5 py-4 font-bold text-gray-900 dark:text-gray-100">${dt}</td>
+                        <td class="px-5 py-4 font-semibold text-gray-500">${s.shiftType}</td>
+                        <td class="px-5 py-4 font-bold text-gray-800 dark:text-gray-200">${s.staffName}${s.duNumber ? ' <span class="text-xs font-normal text-gray-500">(' + s.duNumber + ')</span>' : ''}</td>
+                        <td class="px-5 py-4 text-right font-bold text-blue-600 dark:text-blue-400">${hsdVol}</td>
+                        <td class="px-5 py-4 text-right font-bold text-orange-500 dark:text-orange-400">${msVol}</td>
+                        <td class="px-5 py-4 text-right font-black text-gray-900 dark:text-gray-100">₹${fmtNum(s.saleInfo?.totalSale)}</td>
+                        <td class="px-5 py-4 text-right font-bold text-purple-600 dark:text-purple-400">₹${fmtNum(s.financials?.online)}</td>
+                        <td class="px-5 py-4 text-right font-bold text-emerald-600 dark:text-emerald-400">₹${fmtNum(s.financials?.cash)}</td>
+                        <td class="px-5 py-4 text-right font-bold text-red-500 dark:text-red-400">₹${(s.financials.expenses || 0).toFixed(2)}</td>
+                        <td class="px-5 py-4 text-right font-bold text-amber-500 dark:text-amber-400">₹${(s.financials.lent || 0).toFixed(2)}</td>
+                        <td class="px-5 py-4 text-right font-black ${diffColor}">₹${s.financials.difference.toFixed(2)}</td>
+                        <td class="px-5 py-4 text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <button onclick="viewShiftDetails('${s.id}')" class="bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 dark:text-blue-400 px-3 py-2 rounded-lg font-bold transition text-xs flex items-center gap-1.5 active:scale-95" title="View"><i class="fa-solid fa-eye"></i></button>
+                                <button onclick="editShift('${s.id}')" class="bg-amber-50 hover:bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 dark:text-amber-400 px-3 py-2 rounded-lg font-bold transition text-xs flex items-center gap-1.5 active:scale-95" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                                <button onclick="openDownloadModal('${s.id}')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-300 px-3 py-2 rounded-lg font-bold transition text-xs flex items-center gap-1.5 active:scale-95" title="Download"><i class="fa-solid fa-download"></i></button>
+                                <button onclick="deleteShift('${s.id}')" class="bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-400 px-3 py-2 rounded-lg font-bold transition text-xs flex items-center gap-1.5 active:scale-95" title="Delete"><i class="fa-solid fa-trash-can"></i></button>
+                            </div>
+                        </td>
+                    `;
+                } else {
+                    tr.innerHTML = `
+                        <td class="px-5 py-4">
+                            <div class="font-bold text-gray-900 dark:text-gray-100">${dt}</div>
+                            <div class="text-xs text-gray-500 font-semibold">${s.shiftType}</div>
+                        </td>
+                        <td class="px-5 py-4 font-bold text-gray-800 dark:text-gray-200">${s.staffName}${s.duNumber ? ' <span class="text-xs font-normal text-gray-500">(' + s.duNumber + ')</span>' : ''}</td>
+                        <td class="px-5 py-4 text-right font-black text-gray-900 dark:text-gray-100">₹${fmtNum(s.saleInfo?.totalSale)}</td>
+                        <td class="px-5 py-4 text-right font-bold text-purple-600 dark:text-purple-400">₹${fmtNum(s.financials?.online)}</td>
+                        <td class="px-5 py-4 text-right font-bold text-emerald-600 dark:text-emerald-400">₹${fmtNum(s.financials?.cash)}</td>
+                        <td class="px-5 py-4 text-right font-bold text-red-500 dark:text-red-400">₹${(s.financials.expenses || 0).toFixed(2)}</td>
+                        <td class="px-5 py-4 text-right font-bold text-amber-500 dark:text-amber-400">₹${(s.financials.lent || 0).toFixed(2)}</td>
+                        <td class="px-5 py-4 text-right font-black ${diffColor}">₹${s.financials.difference.toFixed(2)}</td>
+                        <td class="px-5 py-4 text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <button onclick="viewShiftDetails('${s.id}')" class="bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 dark:text-blue-400 px-3 py-2 rounded-lg font-bold transition text-xs flex items-center gap-1.5 active:scale-95" title="View"><i class="fa-solid fa-eye"></i></button>
+                                <button onclick="editShift('${s.id}')" class="bg-amber-50 hover:bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 dark:text-amber-400 px-3 py-2 rounded-lg font-bold transition text-xs flex items-center gap-1.5 active:scale-95" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                                <button onclick="openDownloadModal('${s.id}')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-300 px-3 py-2 rounded-lg font-bold transition text-xs flex items-center gap-1.5 active:scale-95" title="Download"><i class="fa-solid fa-download"></i></button>
+                                <button onclick="deleteShift('${s.id}')" class="bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-400 px-3 py-2 rounded-lg font-bold transition text-xs flex items-center gap-1.5 active:scale-95" title="Delete"><i class="fa-solid fa-trash-can"></i></button>
+                            </div>
+                        </td>
+                    `;
+                }
                 tbody.appendChild(tr);
             });
         }
 
         window.viewShiftDetails = function (id) {
-            const shift = state.shifts.find(s => s.id === id);
+            let shift;
+            if (id.startsWith('d2d_')) {
+                const rawShift = state.d2dShifts.find(s => s.id === id);
+                if (!rawShift) return;
+                
+                const m1 = rawShift.raw?.m1 || {};
+                const m2 = rawShift.raw?.m2 || {};
+                
+                // Safe formatting for the mock readings logic
+                const t1o = m1.on1 !== undefined && m1.on1 !== '' ? parseFloat(m1.on1) : '-';
+                const t1c = m1.cn1 !== undefined && m1.cn1 !== '' ? parseFloat(m1.cn1) : '-';
+                const t2o = m1.on2 !== undefined && m1.on2 !== '' ? parseFloat(m1.on2) : '-';
+                const t2c = m1.cn2 !== undefined && m1.cn2 !== '' ? parseFloat(m1.cn2) : '-';
+                const t3o = m2.on3 !== undefined && m2.on3 !== '' ? parseFloat(m2.on3) : '-';
+                const t3c = m2.cn3 !== undefined && m2.cn3 !== '' ? parseFloat(m2.cn3) : '-';
+                const t4o = m2.on4 !== undefined && m2.on4 !== '' ? parseFloat(m2.on4) : '-';
+                const t4c = m2.cn4 !== undefined && m2.cn4 !== '' ? parseFloat(m2.cn4) : '-';
+
+                // create synthetic normal shift format
+                shift = {
+                    ...rawShift,
+                    rates: rawShift.rates || { hsd: 0, ms: 0 },
+                    saleInfo: { hsdVol: rawShift.saleInfo?.hsdVol || 0, msVol: rawShift.saleInfo?.msVol || 0, totalSale: rawShift.saleInfo?.totalSale || 0 },
+                    financials: rawShift.financials || { online: 0, cash: 0, expenses: 0, lent: 0, difference: 0 },
+                    readings: {
+                       n1: { open: t1o, close: t1c, diff: (t1o !== '-' && t1c !== '-') ? (t1c - t1o).toFixed(2) : '-' },
+                       n2: { open: t2o, close: t2c, diff: (t2o !== '-' && t2c !== '-') ? (t2c - t2o).toFixed(2) : '-' },
+                       n3: { open: t3o, close: t3c, diff: (t3o !== '-' && t3c !== '-') ? (t3c - t3o).toFixed(2) : '-' },
+                       n4: { open: t4o, close: t4c, diff: (t4o !== '-' && t4c !== '-') ? (t4c - t4o).toFixed(2) : '-' }
+                    },
+                    hsdTest: rawShift.raw?.testing?.hsd || 0, msTest: rawShift.raw?.testing?.ms || 0
+                };
+            } else {
+                shift = state.shifts.find(s => s.id === id);
+            }
             if (!shift) return;
+            
+            // Bulletproof against absolutely any missing root structures from archaic legacy reports:
+            shift.rates = shift.rates || { hsd: 0, ms: 0 };
+            shift.saleInfo = shift.saleInfo || { hsdVol: 0, msVol: 0, totalSale: 0 };
+            shift.financials = shift.financials || { online: 0, cash: 0, expenses: 0, lent: 0, difference: 0 };
+            shift.denominations = shift.denominations || {};
+            shift.onlineBreakdown = shift.onlineBreakdown || {};
 
             const dt = new Date(shift.date);
             document.getElementById('det-date-display').textContent = dt.toLocaleDateString() + ' - ' + dt.toLocaleTimeString();
@@ -3230,12 +4430,18 @@
             let shiftsToExport = [];
 
             if (singleShiftId) {
-                const s = state.shifts.find(shift => shift.id === singleShiftId);
+                let s = state.shifts.find(shift => shift.id === singleShiftId);
+                if (!s && singleShiftId.startsWith('d2d_')) {
+                    s = state.d2dShifts.find(shift => shift.id === singleShiftId);
+                }
                 if (s) shiftsToExport.push(s);
             } else {
                 const filterDate = document.getElementById('filter-date').value;
                 const filterStaff = document.getElementById('filter-staff').value;
-                shiftsToExport = state.shifts.slice().reverse(); // Keep order consistent
+                const filterMode = document.getElementById('filter-mode') ? document.getElementById('filter-mode').value : 'summary';
+
+                let sourceShifts = filterMode === 'detailed' ? state.d2dShifts : state.shifts;
+                shiftsToExport = sourceShifts.slice().reverse(); // Keep order consistent
 
                 if (currentUser && currentUser.role === 'staff') {
                     shiftsToExport = shiftsToExport.filter(s => s.staffId === currentUser.id);
@@ -3268,14 +4474,14 @@
                     new Date(s.date).toLocaleDateString(),
                     s.shiftType,
                     s.staffName,
-                    s.saleInfo.hsdVol.toFixed(2),
-                    s.saleInfo.msVol.toFixed(2),
-                    s.saleInfo.totalSale.toFixed(2),
-                    s.financials.online.toFixed(2),
-                    s.financials.cash.toFixed(2),
-                    (s.financials.expenses || 0).toFixed(2),
-                    (s.financials.lent || 0).toFixed(2),
-                    s.financials.difference.toFixed(2)
+                    (s.saleInfo?.hsdVol || 0).toFixed(2),
+                    (s.saleInfo?.msVol || 0).toFixed(2),
+                    fmtNum(s.saleInfo?.totalSale),
+                    fmtNum(s.financials?.online),
+                    fmtNum(s.financials?.cash),
+                    fmtNum(s.financials?.expenses),
+                    fmtNum(s.financials?.lent),
+                    fmtNum(Math.abs(s.financials?.difference || 0))
                 ]);
 
                 // Expenses Table Data
@@ -3320,7 +4526,7 @@
             // Calculate Daily Summary
             let sumHsdVol = 0, sumMsVol = 0;
             let sumHsdCash = 0, sumMsCash = 0;
-            let sumDayCash = 0, sumOnline = 0, sumExpense = 0, sumLent = 0;
+            let sumDayCash = 0, sumOnline = 0, sumExpense = 0, sumLent = 0, sumSalary = 0;
 
             shiftsToExport.forEach(s => {
                 if (s.saleInfo) {
@@ -3336,35 +4542,18 @@
                     sumOnline += s.financials.online || 0;
                     sumExpense += s.financials.expenses || 0;
                     sumLent += s.financials.lent || 0;
+                    sumSalary += s.financials.salary || 0;
                 }
             });
 
             // Render PDF Daily Summary Block
+            const tableHeaders = ["Date", "Type", "Staff Member", "HSD Vol.", "MS Vol.", "Total Sale", "Online", "Cash", "Expenses", "Lent", "Diff"];
             doc.setFontSize(14);
             doc.text("Daily Summary", 14, 30);
 
             doc.autoTable({
-                startY: 35,
-                head: [['Volume Summary', 'Sales Summary', 'Operations Summary']],
-                body: [[
-                    `Total HSD : ${sumHsdVol.toFixed(2)} L\nTotal MS : ${sumMsVol.toFixed(2)} L\nGross Sell : ${(sumHsdVol + sumMsVol).toFixed(2)} L`,
-                    `HSD Cash : Rs ${sumHsdCash.toFixed(2)}\nMS Cash : Rs ${sumMsCash.toFixed(2)}\nGross Cash : Rs ${(sumHsdCash + sumMsCash).toFixed(2)}`,
-                    `Day Cash : Rs ${sumDayCash.toFixed(2)}\nOnline : Rs ${sumOnline.toFixed(2)}\nExpense : Rs ${sumExpense.toFixed(2)}\nLent : Rs ${sumLent.toFixed(2)}\nTotal : Rs ${(sumDayCash + sumOnline + sumExpense + sumLent).toFixed(2)}`
-                ]],
-                theme: 'grid',
-                styles: { fontSize: 9, fontStyle: 'bold', halign: 'left', cellPadding: 3 },
-                headStyles: { fillColor: [75, 85, 99], halign: 'center' }
-            });
-
-            let finalY = doc.lastAutoTable.finalY || 35;
-
-            // Shift Records Table (Main Details)
-            doc.setFontSize(14);
-            doc.text("Shift Records", 14, finalY + 15);
-
-            doc.autoTable({
-                startY: finalY + 20,
-                head: [['Date', 'Shift', 'Staff', 'HSD(L)', 'MS(L)', 'Sale', 'Online', 'Cash', 'Exp', 'Lent', 'Diff']],
+                startY: 55,
+                head: [tableHeaders],
                 body: tableData,
                 theme: 'grid',
                 styles: { fontSize: 7, fontStyle: 'bold' },
@@ -3433,12 +4622,18 @@
             let shiftsToExport = [];
 
             if (singleShiftId) {
-                const s = state.shifts.find(shift => shift.id === singleShiftId);
+                let s = state.shifts.find(shift => shift.id === singleShiftId);
+                if (!s && singleShiftId.startsWith('d2d_')) {
+                    s = state.d2dShifts.find(shift => shift.id === singleShiftId);
+                }
                 if (s) shiftsToExport.push(s);
             } else {
                 const filterDate = document.getElementById('filter-date').value;
                 const filterStaff = document.getElementById('filter-staff').value;
-                shiftsToExport = state.shifts.slice().reverse(); // Keep order consistent
+                const filterMode = document.getElementById('filter-mode') ? document.getElementById('filter-mode').value : 'summary';
+
+                let sourceShifts = filterMode === 'detailed' ? state.d2dShifts : state.shifts;
+                shiftsToExport = sourceShifts.slice().reverse(); // Keep order consistent
 
                 if (currentUser && currentUser.role === 'staff') {
                     shiftsToExport = shiftsToExport.filter(s => s.staffId === currentUser.id);
@@ -3469,17 +4664,17 @@
                     "Time": new Date(s.date).toLocaleTimeString(),
                     "Shift": s.shiftType,
                     "Staff Name": s.staffName,
-                    "HSD Rate": s.rates.hsd,
-                    "MS Rate": s.rates.ms,
-                    "HSD Volume": s.saleInfo.hsdVol,
-                    "MS Volume": s.saleInfo.msVol,
-                    "Total Sale": s.saleInfo.totalSale,
-                    "Online Payment": s.financials.online,
-                    "Total Expenses": s.financials.expenses || 0,
-                    "Total Lent Money": s.financials.lent || 0,
-                    "Expected Cash": s.financials.expected,
-                    "Actual Cash": s.financials.cash,
-                    "Difference": s.financials.difference
+                    "HSD Rate": s.rates?.hsd || 0,
+                    "MS Rate": s.rates?.ms || 0,
+                    "HSD Volume": s.saleInfo?.hsdVol || 0,
+                    "MS Volume": s.saleInfo?.msVol || 0,
+                    "Total Sale": s.saleInfo?.totalSale || 0,
+                    "Online Payment": s.financials?.online || 0,
+                    "Total Expenses": s.financials?.expenses || 0,
+                    "Total Lent Money": s.financials?.lent || 0,
+                    "Expected Cash": s.financials?.expected || 0,
+                    "Actual Cash": s.financials?.cash || 0,
+                    "Difference": s.financials?.difference || 0
                 });
 
                 // Populate Expense Log Data
@@ -3528,7 +4723,7 @@
             // Calculate Daily Summary
             let sumHsdVol = 0, sumMsVol = 0;
             let sumHsdCash = 0, sumMsCash = 0;
-            let sumDayCash = 0, sumOnline = 0, sumExpense = 0, sumLent = 0;
+            let sumDayCash = 0, sumOnline = 0, sumExpense = 0, sumLent = 0, sumSalary = 0;
 
             shiftsToExport.forEach(s => {
                 if (s.saleInfo) {
@@ -3544,24 +4739,25 @@
                     sumOnline += s.financials.online || 0;
                     sumExpense += s.financials.expenses || 0;
                     sumLent += s.financials.lent || 0;
+                    sumSalary += s.financials.salary || 0;
                 }
             });
 
             const summaryLogData = [
-                { "Category": "Volume Summary", "Metric": "Total HSD (ltr)", "Value": sumHsdVol.toFixed(2) },
-                { "Category": "Volume Summary", "Metric": "Total MS (ltr)", "Value": sumMsVol.toFixed(2) },
-                { "Category": "Volume Summary", "Metric": "Gross sell (ltr)", "Value": (sumHsdVol + sumMsVol).toFixed(2) },
+                { "Category": "Volume Summary", "Metric": "Total HSD (ltr)", "Value": fmtNum(sumHsdVol) },
+                { "Category": "Volume Summary", "Metric": "Total MS (ltr)", "Value": fmtNum(sumMsVol) },
+                { "Category": "Volume Summary", "Metric": "Gross sell (ltr)", "Value": fmtNum(sumHsdVol + sumMsVol) },
                 { "Category": "", "Metric": "", "Value": "" },
-                { "Category": "Sales Summary", "Metric": "Gross HSD Cash", "Value": "Rs " + sumHsdCash.toFixed(2) },
-                { "Category": "Sales Summary", "Metric": "Gross MS Cash", "Value": "Rs " + sumMsCash.toFixed(2) },
-                { "Category": "Sales Summary", "Metric": "Gross sell Cash", "Value": "Rs " + (sumHsdCash + sumMsCash).toFixed(2) },
+                { "Category": "Sales Summary", "Metric": "Gross HSD Cash", "Value": "Rs " + fmtNum(sumHsdCash) },
+                { "Category": "Sales Summary", "Metric": "Gross MS Cash", "Value": "Rs " + fmtNum(sumMsCash) },
+                { "Category": "Sales Summary", "Metric": "Gross sell Cash", "Value": "Rs " + fmtNum(sumHsdCash + sumMsCash) },
                 { "Category": "", "Metric": "", "Value": "" },
-                { "Category": "Operations Summary", "Metric": "Total Day cash", "Value": "Rs " + sumDayCash.toFixed(2) },
-                { "Category": "Operations Summary", "Metric": "Total Online", "Value": "Rs " + sumOnline.toFixed(2) },
-                { "Category": "Operations Summary", "Metric": "Total expense", "Value": "Rs " + sumExpense.toFixed(2) },
+                { "Category": "Operations Summary", "Metric": "Total Day cash", "Value": "Rs " + fmtNum(sumDayCash) },
+                { "Category": "Operations Summary", "Metric": "Total Online", "Value": "Rs " + fmtNum(sumOnline) },
+                { "Category": "Operations Summary", "Metric": "Total expense", "Value": "Rs " + fmtNum(sumExpense) },
                 { "Category": "Operations Summary", "Metric": "Total Salary", "Value": "Rs " + sumSalary.toFixed(2) },
-                { "Category": "Operations Summary", "Metric": "Total Lent", "Value": "Rs " + sumLent.toFixed(2) },
-                { "Category": "Operations Summary", "Metric": "Overall Total", "Value": "Rs " + (sumDayCash + sumOnline + sumExpense + sumLent).toFixed(2) }
+                { "Category": "Operations Summary", "Metric": "Total Lent", "Value": "Rs " + fmtNum(sumLent) },
+                { "Category": "Operations Summary", "Metric": "Overall Total", "Value": "Rs " + fmtNum(sumDayCash + sumOnline + sumExpense + sumLent) }
             ];
 
             const wb = XLSX.utils.book_new();
@@ -3681,6 +4877,8 @@
                 if (dashSub) dashSub.innerText = "Your personal shift reporting.";
                 const filterStaff = document.getElementById('filter-staff');
                 if (filterStaff) filterStaff.classList.add('hidden');
+                const btnD2D = document.getElementById('btn-enter-d2d');
+                if (btnD2D) btnD2D.classList.add('hidden');
 
                 // Route them to dashboard
                 navigate('manager-dashboard');
@@ -3704,6 +4902,8 @@
                 if (dashSub) dashSub.innerText = "Overview, reporting, and staff administration";
                 const filterStaff = document.getElementById('filter-staff');
                 if (filterStaff) filterStaff.classList.remove('hidden');
+                const btnD2D = document.getElementById('btn-enter-d2d');
+                if (btnD2D) btnD2D.classList.remove('hidden');
 
                 // Keep them on manager dashboard initially
                 navigate('manager-dashboard');
@@ -3745,6 +4945,7 @@
                         const data = snap.data();
                         state.users = data.users || [];
                         state.shifts = data.shifts || [];
+                        state.d2dShifts = data.d2dShifts || [];
                         state.attendance = data.attendance || [];
                         state.downloads = data.downloads || [];
                         state.drafts = data.drafts || [];
