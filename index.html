@@ -4859,12 +4859,35 @@
             });
 
             // Render PDF Daily Summary Block
-            const tableHeaders = ["Date", "Type", "Staff Member", "HSD Vol.", "MS Vol.", "Total Sale", "Online", "Cash", "Expenses", "Lent", "Diff"];
             doc.setFontSize(14);
-            doc.text("Daily Summary", 14, 30);
+            doc.text(singleShiftId ? "Shift Summary" : "Overall Summary", 14, 30);
+
+            const summaryBody = [
+                [`Total HSD: ${sumHsdVol.toFixed(2)} L`, `Gross HSD: Rs ${fmtNum(sumHsdCash)}`, `Day Cash: Rs ${fmtNum(sumDayCash)}`],
+                [`Total MS: ${sumMsVol.toFixed(2)} L`, `Gross MS: Rs ${fmtNum(sumMsCash)}`, `Online: Rs ${fmtNum(sumOnline)}`],
+                [`Gross Vol: ${(sumHsdVol + sumMsVol).toFixed(2)} L`, `Gross Sales: Rs ${fmtNum(sumHsdCash + sumMsCash)}`, `Expenses: Rs ${fmtNum(sumExpense)}`],
+                ['', '', `Lent: Rs ${fmtNum(sumLent)}`],
+                ['', '', `Total Ops: Rs ${fmtNum(sumDayCash + sumOnline + sumExpense + sumLent)}`]
+            ];
 
             doc.autoTable({
-                startY: 55,
+                startY: 35,
+                head: [['VOLUME', 'SALES', 'OPERATIONS']],
+                body: summaryBody,
+                theme: 'grid',
+                styles: { fontSize: 9, cellPadding: 2, fontStyle: 'bold' },
+                headStyles: { fillColor: [55, 65, 81] }
+            });
+
+            let finalY = doc.lastAutoTable.finalY;
+
+            // Render Shift Details Table
+            const tableHeaders = ["Date", "Type", "Staff Member", "HSD Vol.", "MS Vol.", "Total Sale", "Online", "Cash", "Expenses", "Lent", "Diff"];
+            doc.setFontSize(14);
+            doc.text("Shift Details", 14, finalY + 15);
+
+            doc.autoTable({
+                startY: finalY + 20,
                 head: [tableHeaders],
                 body: tableData,
                 theme: 'grid',
