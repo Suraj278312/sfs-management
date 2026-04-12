@@ -3667,6 +3667,12 @@
             });
             const totalSalary = salaryList.reduce((sum, s) => sum + s.amount, 0);
 
+            const parseTextNum = (id) => {
+                const el = document.getElementById(id);
+                if (!el) return 0;
+                return parseFloat(el.textContent.replace(/,/g, '')) || 0;
+            };
+
             const shiftData = {
                 staffId: staffId,
                 staffName: staffName,
@@ -3674,10 +3680,10 @@
                 duNumber: duNumber,
                 rates: { hsd: getVal('inp-rate-hsd'), ms: getVal('inp-rate-ms') },
                 readings: {
-                    n1: { open: getVal('inp-n1-open'), close: getVal('inp-n1-close'), diff: parseFloat(document.getElementById('n1-diff').textContent) || 0 },
-                    n2: { open: getVal('inp-n2-open'), close: getVal('inp-n2-close'), diff: parseFloat(document.getElementById('n2-diff').textContent) || 0 },
-                    n3: { open: getVal('inp-n3-open'), close: getVal('inp-n3-close'), diff: parseFloat(document.getElementById('n3-diff').textContent) || 0 },
-                    n4: { open: getVal('inp-n4-open'), close: getVal('inp-n4-close'), diff: parseFloat(document.getElementById('n4-diff').textContent) || 0 },
+                    n1: { open: getVal('inp-n1-open'), close: getVal('inp-n1-close'), diff: parseTextNum('n1-diff') },
+                    n2: { open: getVal('inp-n2-open'), close: getVal('inp-n2-close'), diff: parseTextNum('n2-diff') },
+                    n3: { open: getVal('inp-n3-open'), close: getVal('inp-n3-close'), diff: parseTextNum('n3-diff') },
+                    n4: { open: getVal('inp-n4-open'), close: getVal('inp-n4-close'), diff: parseTextNum('n4-diff') },
                     testHsd: getVal('inp-test-hsd'),
                     testMs: getVal('inp-test-ms')
                 },
@@ -3689,19 +3695,19 @@
                     card: getVal('inp-online-card'), paytm: getVal('inp-online-paytm'), gpay1: getVal('inp-online-gpay1'), gpay2: getVal('inp-online-gpay2')
                 },
                 saleInfo: {
-                    totalSale: parseFloat(document.getElementById('calc-total-sale').textContent),
-                    hsdVol: parseFloat(document.getElementById('hsd-final-vol').textContent),
-                    msVol: parseFloat(document.getElementById('ms-final-vol').textContent),
+                    totalSale: parseTextNum('calc-total-sale'),
+                    hsdVol: parseTextNum('hsd-final-vol'),
+                    msVol: parseTextNum('ms-final-vol'),
                 },
                 financials: {
-                    online: parseFloat(document.getElementById('calc-online-total').textContent),
+                    online: parseTextNum('calc-online-total'),
                     expenses: totalExpenses,
                     expenseDetails: expenseList,
                     lent: totalLent,
                     lentDetails: lentList,
-                    cash: parseFloat(document.getElementById('calc-cash-total').textContent),
-                    expected: parseFloat(document.getElementById('calc-expected-cash').textContent),
-                    difference: parseFloat(document.getElementById('calc-cash-total').textContent) - parseFloat(document.getElementById('calc-expected-cash').textContent)
+                    cash: parseTextNum('calc-cash-total'),
+                    expected: parseTextNum('calc-expected-cash'),
+                    difference: parseTextNum('calc-cash-total') - parseTextNum('calc-expected-cash')
                 }
             };
 
