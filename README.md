@@ -20,47 +20,7 @@ By utilizing dynamic form logic and real-time reconciliation algorithms, the sys
 
 Built using a **Liquid Glassmorphism** design architecture wrapped in **CapacitorJS**, this codebase acts identically as both an ultra-fast desktop web application for pump owners, and a natively-installed Android application for pump employees working the floor.
 
----
 
-## 📸 Application Gallery
-
-<!-- Main Dashboard -->
-<div align="center">
- <img width="1254" height="630" alt="image" src="https://github.com/user-attachments/assets/fab9c81b-cb82-47fc-845c-392b77681dff" />
-  <p><em>Fig 1. The Main Management Dashboard featuring Liquid Glassmorphism UI and Real-Time Analytics.</em></p>
-</div>
-
-<!-- Day To Day -->
-<div align="center">
-  <img width="1919" height="897" alt="Day_To_Day" src="https://github.com/user-attachments/assets/f591f48b-0b8a-4923-a76e-e34b8ab0dc14" />
- <p><em>Fig 2. Interactive Nozzle Calculation Matrix automating H.S.D & M.S totals.</em></p>
-</div>
-
-<!-- Daily Shift -->
-<div align="center">
-<img width="1919" height="969" alt="Daily_Shift" src="https://github.com/user-attachments/assets/20637883-b54f-4bdf-bc99-6e95a74b3698" />
-  <p><em>Fig 3. Comprehensive individual employee shift tracking interface.</em></p>
-</div>
-
-<!-- View Shift Record -->
-<div align="center">
-<img width="1172" height="757" alt="View_Shift_Record" src="https://github.com/user-attachments/assets/3a58cece-3b23-42da-8f4b-933be27ef239" />
-  <p><em>Fig 4. Read-only audited view for historical shift reviews.</em></p>
-</div>
-
-<!-- Attendence -->
-<div align="center">
-<img width="1523" height="889" alt="Attendence" src="https://github.com/user-attachments/assets/b17c3982-a01f-4152-9d56-cc67ed24bfdd" />
-  <p><em>Fig 5. Built-in Staff Attendance monitoring and scheduling arrays.</em></p>
-</div>
-
-<!-- LoginPage -->
-<div align="center">
-<img width="1919" height="968" alt="LoginPage" src="https://github.com/user-attachments/assets/2d5fd995-9c13-45b8-b8d7-588f91bbced0" />
-  <p><em>Fig 6. Secure Authentication Portal with transparent frosted glass layers.</em></p>
-</div>
-
----
 
 ## 🚀 Core Architectural Modules
 
@@ -154,6 +114,46 @@ npx cap open android
 ## 🔒 Security Configuration
 Currently, routing bypasses complex middleware. A master `localStorage` token (`isLoggedIn=true`) guards the `DOMContentLoaded` router.
 If users are required to authenticate, they pass through a static gate. Total system security relies exclusively on Firebase Firestore Database Rules validating incoming requests against valid registered endpoints.
+
+---
+
+## 📸 Application Gallery
+
+<!-- Main Dashboard -->
+<div align="center">
+ <img width="1254" height="630" alt="image" src="https://github.com/user-attachments/assets/fab9c81b-cb82-47fc-845c-392b77681dff" />
+  <p><em>Fig 1. The Main Management Dashboard featuring Liquid Glassmorphism UI and Real-Time Analytics.</em></p>
+</div>
+
+<!-- Day To Day -->
+<div align="center">
+  <img width="1919" height="897" alt="Day_To_Day" src="https://github.com/user-attachments/assets/f591f48b-0b8a-4923-a76e-e34b8ab0dc14" />
+ <p><em>Fig 2. Interactive Nozzle Calculation Matrix automating H.S.D & M.S totals.</em></p>
+</div>
+
+<!-- Daily Shift -->
+<div align="center">
+<img width="1919" height="969" alt="Daily_Shift" src="https://github.com/user-attachments/assets/20637883-b54f-4bdf-bc99-6e95a74b3698" />
+  <p><em>Fig 3. Comprehensive individual employee shift tracking interface.</em></p>
+</div>
+
+<!-- View Shift Record -->
+<div align="center">
+<img width="1172" height="757" alt="View_Shift_Record" src="https://github.com/user-attachments/assets/3a58cece-3b23-42da-8f4b-933be27ef239" />
+  <p><em>Fig 4. Read-only audited view for historical shift reviews.</em></p>
+</div>
+
+<!-- Attendence -->
+<div align="center">
+<img width="1523" height="889" alt="Attendence" src="https://github.com/user-attachments/assets/b17c3982-a01f-4152-9d56-cc67ed24bfdd" />
+  <p><em>Fig 5. Built-in Staff Attendance monitoring and scheduling arrays.</em></p>
+</div>
+
+<!-- LoginPage -->
+<div align="center">
+<img width="1919" height="968" alt="LoginPage" src="https://github.com/user-attachments/assets/2d5fd995-9c13-45b8-b8d7-588f91bbced0" />
+  <p><em>Fig 6. Secure Authentication Portal with transparent frosted glass layers.</em></p>
+</div>
 
 ---
 
