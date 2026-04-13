@@ -26,7 +26,7 @@ Built using a **Liquid Glassmorphism** design architecture wrapped in **Capacito
 
 <!-- Main Dashboard -->
 <div align="center">
-  <img src="./screenshots/Main_Dashboard.png" width="800" alt="Main Management Dashboard View" />
+ <img width="1254" height="630" alt="image" src="https://github.com/user-attachments/assets/fab9c81b-cb82-47fc-845c-392b77681dff" />
   <p><em>Fig 1. The Main Management Dashboard featuring Liquid Glassmorphism UI and Real-Time Analytics.</em></p>
 </div>
 
