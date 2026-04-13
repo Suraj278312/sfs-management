@@ -26,37 +26,37 @@ Built using a **Liquid Glassmorphism** design architecture wrapped in **Capacito
 
 <!-- Main Dashboard -->
 <div align="center">
-  <img src="screenshots/Main%20Dashboard.png" width="800" alt="Main Management Dashboard View" />
+  <img src="./screenshots/Main_Dashboard.png" width="800" alt="Main Management Dashboard View" />
   <p><em>Fig 1. The Main Management Dashboard featuring Liquid Glassmorphism UI and Real-Time Analytics.</em></p>
 </div>
 
 <!-- Day To Day -->
 <div align="center">
-  <img src="screenshots/Day%20To%20Day.png" width="800" alt="Day to Day Master Shift Entry" />
+  <img src="./screenshots/Day_To_Day.png" width="800" alt="Day to Day Master Shift Entry" />
   <p><em>Fig 2. Interactive Nozzle Calculation Matrix automating H.S.D & M.S totals.</em></p>
 </div>
 
 <!-- Daily Shift -->
 <div align="center">
-  <img src="screenshots/Daily%20Shift.png" width="800" alt="Individual Daily Shift Entry" />
+  <img src="./screenshots/Daily_Shift.png" width="800" alt="Individual Daily Shift Entry" />
   <p><em>Fig 3. Comprehensive individual employee shift tracking interface.</em></p>
 </div>
 
 <!-- View Shift Record -->
 <div align="center">
-  <img src="screenshots/View%20Shift%20Record.png" width="800" alt="View Shift Record" />
+  <img src="./screenshots/View_Shift_Record.png" width="800" alt="View Shift Record" />
   <p><em>Fig 4. Read-only audited view for historical shift reviews.</em></p>
 </div>
 
 <!-- Attendence -->
 <div align="center">
-  <img src="screenshots/Attendence.png" width="800" alt="Attendance and Salary Tracking" />
+  <img src="./screenshots/Attendence.png" width="800" alt="Attendance and Salary Tracking" />
   <p><em>Fig 5. Built-in Staff Attendance monitoring and scheduling arrays.</em></p>
 </div>
 
 <!-- LoginPage -->
 <div align="center">
-  <img src="screenshots/LoginPage.png" width="800" alt="Secure Login Portal" />
+  <img src="./screenshots/LoginPage.png" width="800" alt="Secure Login Portal" />
   <p><em>Fig 6. Secure Authentication Portal with transparent frosted glass layers.</em></p>
 </div>
 
