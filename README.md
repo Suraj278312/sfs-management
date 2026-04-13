@@ -32,31 +32,31 @@ Built using a **Liquid Glassmorphism** design architecture wrapped in **Capacito
 
 <!-- Day To Day -->
 <div align="center">
-  <img src="./screenshots/Day_To_Day.png" width="800" alt="Day to Day Master Shift Entry" />
-  <p><em>Fig 2. Interactive Nozzle Calculation Matrix automating H.S.D & M.S totals.</em></p>
+  <img width="1919" height="897" alt="Day_To_Day" src="https://github.com/user-attachments/assets/f591f48b-0b8a-4923-a76e-e34b8ab0dc14" />
+ <p><em>Fig 2. Interactive Nozzle Calculation Matrix automating H.S.D & M.S totals.</em></p>
 </div>
 
 <!-- Daily Shift -->
 <div align="center">
-  <img src="./screenshots/Daily_Shift.png" width="800" alt="Individual Daily Shift Entry" />
+<img width="1919" height="969" alt="Daily_Shift" src="https://github.com/user-attachments/assets/20637883-b54f-4bdf-bc99-6e95a74b3698" />
   <p><em>Fig 3. Comprehensive individual employee shift tracking interface.</em></p>
 </div>
 
 <!-- View Shift Record -->
 <div align="center">
-  <img src="./screenshots/View_Shift_Record.png" width="800" alt="View Shift Record" />
+<img width="1172" height="757" alt="View_Shift_Record" src="https://github.com/user-attachments/assets/3a58cece-3b23-42da-8f4b-933be27ef239" />
   <p><em>Fig 4. Read-only audited view for historical shift reviews.</em></p>
 </div>
 
 <!-- Attendence -->
 <div align="center">
-  <img src="./screenshots/Attendence.png" width="800" alt="Attendance and Salary Tracking" />
+<img width="1523" height="889" alt="Attendence" src="https://github.com/user-attachments/assets/b17c3982-a01f-4152-9d56-cc67ed24bfdd" />
   <p><em>Fig 5. Built-in Staff Attendance monitoring and scheduling arrays.</em></p>
 </div>
 
 <!-- LoginPage -->
 <div align="center">
-  <img src="./screenshots/LoginPage.png" width="800" alt="Secure Login Portal" />
+<img width="1919" height="968" alt="LoginPage" src="https://github.com/user-attachments/assets/2d5fd995-9c13-45b8-b8d7-588f91bbced0" />
   <p><em>Fig 6. Secure Authentication Portal with transparent frosted glass layers.</em></p>
 </div>
 
