@@ -695,7 +695,8 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
                 <div>
                     <h1 class="text-2xl font-black text-gray-900 dark:text-white">Daily Shift Entry</h1>
-                    <p class="text-gray-500 font-medium" id="shift-date-display"></p>
+                    <p class="text-gray-500 font-medium hidden" id="shift-date-display"></p>
+                    <input type="date" id="inp-shift-date" class="mt-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-xl text-sm border-0 focus:ring-2 focus:ring-primary font-bold shadow-inner" required />
                 </div>
                 <div class="flex gap-2 w-full sm:w-fit">
                     <button type="button" onclick="discardDraft()"
@@ -3136,7 +3137,9 @@
             currentEditingDraftId = null; // Clear out any active draft
             navigate('shift-entry-view');
 
+            document.getElementById('shift-date-display').classList.remove('hidden');
             document.getElementById('shift-date-display').textContent = "Editing Shift from: " + new Date(s.date).toDateString();
+            if (document.getElementById('inp-shift-date')) document.getElementById('inp-shift-date').classList.add('hidden');
 
             document.getElementById('shift-form').reset();
             document.getElementById('expense-list-container').innerHTML = '';
@@ -3253,6 +3256,11 @@
 
         function initShiftForm() {
             document.getElementById('shift-date-display').textContent = new Date().toDateString();
+            document.getElementById('shift-date-display').classList.add('hidden');
+            if (document.getElementById('inp-shift-date')) {
+                document.getElementById('inp-shift-date').classList.remove('hidden');
+                document.getElementById('inp-shift-date').value = new Date().toISOString().split('T')[0];
+            }
 
             document.getElementById('shift-form').reset();
 
@@ -3740,7 +3748,15 @@
             } else {
                 // We are saving a brand new shift
                 shiftData.id = Date.now().toString();
-                shiftData.date = new Date().toISOString();
+                const selDate = document.getElementById('inp-shift-date') ? document.getElementById('inp-shift-date').value : null;
+                if (selDate) {
+                    const d = new Date(selDate);
+                    const now = new Date();
+                    d.setHours(now.getHours(), now.getMinutes(), now.getSeconds());
+                    shiftData.date = d.toISOString();
+                } else {
+                    shiftData.date = new Date().toISOString();
+                }
                 state.shifts.push(shiftData);
             }
 
@@ -3999,7 +4015,7 @@
 
             tbody.innerHTML = '';
             let sourceShifts = filterMode === 'detailed' ? state.d2dShifts : state.shifts;
-            let filteredShifts = sourceShifts.slice().reverse();
+            let filteredShifts = sourceShifts.slice().sort((a,b) => new Date(b.date) - new Date(a.date));
 
             if (currentUser && currentUser.role === 'staff') {
                 filteredShifts = filteredShifts.filter(s => s.staffId === currentUser.id);
@@ -4540,6 +4556,7 @@
                         allRecords.push({
                             source: `Shift: ${s.staffName}`,
                             id: `${s.id}_${idx}`,
+                            shiftId: s.id,
                             type: 'shift',
                             date: s.date,
                             name: ld.name || '',
@@ -4557,6 +4574,7 @@
                         allRecords.push({
                             source: `Master Log: ${s.staffName}`,
                             id: `${s.id}_${idx}`,
+                            shiftId: s.id,
                             type: 'd2d',
                             date: s.date,
                             name: ld.name || '',
@@ -4615,7 +4633,7 @@
                 let actionBtn = `<button onclick="deleteGeneralLent('${r.id}')" class="bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-400 px-3 py-2 rounded-lg font-bold transition text-xs flex items-center justify-center mx-auto gap-1.5 active:scale-95" title="Delete"><i class="fa-solid fa-trash-can"></i></button>`;
 
                 if (r.type !== 'independent') {
-                    actionBtn = `<span class="bg-gray-100 text-gray-500 dark:bg-gray-700/60 dark:text-gray-400 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider block mx-auto w-fit whitespace-nowrap" title="Cannot delete shift references here. Edit the shift to modify.">View Only</span>`;
+                    actionBtn = `<button onclick="editShift('${r.shiftId}')" class="bg-amber-50 hover:bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 dark:text-amber-400 px-3 py-2 rounded-lg font-bold transition text-xs flex items-center justify-center mx-auto gap-1.5 active:scale-95" title="Edit Source Shift"><i class="fa-solid fa-pen"></i> Edit Shift</button>`;
                 }
 
                 tr.innerHTML = `
