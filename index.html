@@ -2550,7 +2550,8 @@
                         attendance: state.attendance,
                         downloads: state.downloads,
                         drafts: state.drafts,
-                        lentRecords: state.lentRecords
+                        lentRecords: state.lentRecords,
+                        fuelRates: state.fuelRates
                     });
                 } catch (e) {
                     console.error("Firebase sync error: ", e);
@@ -5659,6 +5660,22 @@
                         state.downloads = data.downloads || [];
                         state.drafts = data.drafts || [];
                         state.lentRecords = data.lentRecords || [];
+                        
+                        if (data.fuelRates) {
+                            state.fuelRates = data.fuelRates;
+                            localStorage.setItem('sfs_fuelRates', JSON.stringify(state.fuelRates));
+                            
+                            const dHsd = document.getElementById('inp-rate-hsd');
+                            const dMs = document.getElementById('inp-rate-ms');
+                            if (dHsd && !dHsd.value.includes('?')) dHsd.value = (Number(state.fuelRates.hsd) || 0).toFixed(2);
+                            if (dMs && !dMs.value.includes('?')) dMs.value = (Number(state.fuelRates.ms) || 0).toFixed(2);
+                            
+                            const d2dHsd = document.getElementById('d2d-rate-hsd');
+                            const d2dMs = document.getElementById('d2d-rate-ms');
+                            if (d2dHsd && !d2dHsd.value.includes('?')) d2dHsd.value = (Number(state.fuelRates.hsd) || 0).toFixed(2);
+                            if (d2dMs && !d2dMs.value.includes('?')) d2dMs.value = (Number(state.fuelRates.ms) || 0).toFixed(2);
+                        }
+
                         showToast("Cloud connection successful", "success");
                     } else {
                         // Document doesn't exist, we upload our local state to migrate data!
