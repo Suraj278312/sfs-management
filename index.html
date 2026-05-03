@@ -247,7 +247,10 @@
                 class="flex border-b border-gray-200 dark:border-gray-700 mb-6 overflow-x-auto no-scrollbar flex-nowrap w-full pb-1">
                 <button
                     class="mgr-tab active px-4 sm:px-5 py-3 font-bold text-primary border-b-2 border-primary whitespace-nowrap text-sm sm:text-base transition"
-                    data-target="tab-reports">Reports & Data</button>
+                    data-target="tab-reports" data-mode="summary">Reports & Data</button>
+                <button
+                    class="mgr-tab px-4 sm:px-5 py-3 font-bold text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 whitespace-nowrap text-sm sm:text-base transition"
+                    data-target="tab-reports" data-mode="detailed">Day to Day Reports</button>
                 <button
                     class="mgr-tab px-4 sm:px-5 py-3 font-bold text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 whitespace-nowrap text-sm sm:text-base transition"
                     data-target="tab-lent">Lent</button>
@@ -261,6 +264,7 @@
 
             <!-- Tab: Reports -->
             <div id="tab-reports" class="mgr-tab-content active space-y-6">
+                <div class="text-[10px] text-gray-400 font-mono">Debug: Total Shifts in Memory: <span id="debug-shift-count">0</span></div>
                 <div
                     class="glass-card p-4 sm:p-5 rounded-2xl shadow-sm flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 border border-gray-200 dark:border-gray-700">
                     <div class="flex flex-col md:flex-row items-center gap-3 w-full xl:w-auto">
@@ -272,7 +276,7 @@
                             <!-- Populated dynamically -->
                         </select>
                         <select id="filter-mode"
-                            class="p-2.5 border rounded-xl backdrop-blur-xl bg-white/60 dark:bg-gray-800/60 border border-white/50 dark:border-white/10 dark:border-gray-600 font-medium w-full md:w-auto focus:ring-primary focus:border-primary text-sm sm:text-base">
+                            class="hidden p-2.5 border rounded-xl backdrop-blur-xl bg-white/60 dark:bg-gray-800/60 border border-white/50 dark:border-white/10 dark:border-gray-600 font-medium w-full md:w-auto focus:ring-primary focus:border-primary text-sm sm:text-base">
                             <option value="summary">Summary View</option>
                             <option value="detailed">Day-to-Day Shift View</option>
                         </select>
@@ -538,12 +542,15 @@
                 <!-- Quick Mark Section -->
                 <div id="quick-mark-section"
                     class="glass-card p-4 md:p-6 rounded-2xl shadow-sm border-l-4 border-l-blue-500 border border-gray-200 dark:border-gray-700">
-                    <div class="flex justify-between items-center mb-4 sm:mb-5">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-5 gap-3">
                         <div>
                             <h3 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white"><i
-                                    class="fa-solid fa-clipboard-user text-blue-500 mr-2"></i>Today's Attendance</h3>
-                            <p class="text-xs sm:text-sm text-gray-500 mt-1" id="attendance-today-date"></p>
+                                    class="fa-solid fa-clipboard-user text-blue-500 mr-2"></i>Mark Attendance</h3>
+                            <p class="text-xs sm:text-sm text-gray-500 mt-1">Select date to mark presence</p>
                         </div>
+                        <input type="date" id="quick-attendance-date" 
+                            class="p-2 border rounded-xl dark:bg-gray-800 dark:border-gray-600 font-medium focus:ring-primary focus:border-primary text-sm"
+                            onchange="renderQuickAttendance()">
                     </div>
                     <div id="quick-attendance-list"
                         class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
@@ -2295,15 +2302,22 @@
             <!-- Result UI -->
             <div class="p-6 flex flex-col space-y-4 hidden" id="scanner-result">
                 <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4">
-                    <h4 class="font-bold text-green-700 dark:text-green-400 mb-3 flex items-center gap-2"><i class="fa-solid fa-circle-check"></i> Found Closing Readings:</h4>
+                    <h4 class="font-bold text-green-700 dark:text-green-400 mb-3 flex items-center gap-2"><i class="fa-solid fa-circle-check"></i> Extracted Readings:</h4>
                     <div class="grid grid-cols-2 gap-3" id="scanner-result-grid">
                         <!-- Injected -->
                     </div>
                 </div>
                 <p class="text-xs text-amber-600 dark:text-amber-400 font-bold bg-amber-50 dark:bg-amber-900/20 p-2 rounded-lg text-center"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Missing nozzles must be matched manually.</p>
-                <div class="flex gap-2">
+                <div class="flex gap-2" id="scanner-action-buttons">
                     <button type="button" onclick="closeScannerModal()" class="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 font-bold py-3 rounded-xl transition-all">Cancel</button>
-                    <button type="button" onclick="applyScannedData()" id="btn-apply-scan" class="flex-1 bg-primary hover:bg-blue-600 text-white font-bold py-3 rounded-xl transition-all shadow-md shadow-primary/30">Apply to Form</button>
+                    <button type="button" onclick="promptApplyType()" id="btn-apply-scan" class="flex-1 bg-primary hover:bg-blue-600 text-white font-bold py-3 rounded-xl transition-all shadow-md shadow-primary/30">Apply to Form</button>
+                </div>
+                <div class="flex flex-col gap-3 hidden animate-fade-in" id="scanner-apply-options">
+                    <p class="text-sm font-bold text-center text-gray-700 dark:text-gray-300">Where would you like to apply these readings?</p>
+                    <div class="flex gap-2">
+                        <button type="button" onclick="applyScannedData('open')" class="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold py-3 rounded-xl transition-all border border-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-800/50">Opening</button>
+                        <button type="button" onclick="applyScannedData('close')" class="flex-1 bg-primary hover:bg-blue-600 text-white font-bold py-3 rounded-xl transition-all shadow-md shadow-primary/30">Closing</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2318,6 +2332,12 @@
             document.getElementById('scanner-content').classList.remove('hidden');
             document.getElementById('scanner-processing').classList.add('hidden');
             document.getElementById('scanner-result').classList.add('hidden');
+            if (document.getElementById('scanner-action-buttons')) {
+                document.getElementById('scanner-action-buttons').classList.remove('hidden');
+            }
+            if (document.getElementById('scanner-apply-options')) {
+                document.getElementById('scanner-apply-options').classList.add('hidden');
+            }
             document.getElementById('camera-input').value = "";
             document.getElementById('gallery-input').value = "";
             scannedNozzles = {};
@@ -2456,31 +2476,30 @@
             }
         }
 
-        window.applyScannedData = function() {
-            if (scannedNozzles.n1) {
-                document.getElementById('inp-n1-close').value = scannedNozzles.n1;
-                // Dispatch event to recalculate
-                document.getElementById('inp-n1-close').dispatchEvent(new Event('input', { bubbles: true }));
-            }
-            if (scannedNozzles.n2) {
-                document.getElementById('inp-n2-close').value = scannedNozzles.n2;
-                document.getElementById('inp-n2-close').dispatchEvent(new Event('input', { bubbles: true }));
-            }
-            if (scannedNozzles.n3) {
-                document.getElementById('inp-n3-close').value = scannedNozzles.n3;
-                document.getElementById('inp-n3-close').dispatchEvent(new Event('input', { bubbles: true }));
-            }
-            if (scannedNozzles.n4) {
-                document.getElementById('inp-n4-close').value = scannedNozzles.n4;
-                document.getElementById('inp-n4-close').dispatchEvent(new Event('input', { bubbles: true }));
-            }
+        window.promptApplyType = function() {
+            document.getElementById('scanner-action-buttons').classList.add('hidden');
+            document.getElementById('scanner-apply-options').classList.remove('hidden');
+        };
+
+        window.applyScannedData = function(type) {
+            const suffix = type === 'open' ? 'open' : 'close';
+            
+            [1, 2, 3, 4].forEach(n => {
+                if (scannedNozzles[`n${n}`]) {
+                    const el = document.getElementById(`inp-n${n}-${suffix}`);
+                    if (el) {
+                        el.value = scannedNozzles[`n${n}`];
+                        el.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                }
+            });
 
             // Fallback global recalculation
             if(window.calculateAll) window.calculateAll();
             
             closeScannerModal();
             // Assuming showToast is registered globally.
-            if(window.showToast) window.showToast("Scanned values automatically mapped!", "success");
+            if(window.showToast) window.showToast(`Scanned values mapped to ${type} readings!`, "success");
         };
     </script>
 
@@ -2555,6 +2574,8 @@
                     });
                 } catch (e) {
                     console.error("Firebase sync error: ", e);
+                    showToast("Cloud sync failed. Check internet/rules.", "error");
+                    throw e; // Rethrow to let caller know it failed
                 }
             }
         }
@@ -3877,7 +3898,7 @@
         }
 
         // Processing Shift Data
-        window.processShiftSave = function (isNext = false) {
+        window.processShiftSave = async function (isNext = false) {
             const selectEl = document.getElementById('inp-staff-select');
             const staffId = selectEl.value;
             if (!staffId) {
@@ -4009,17 +4030,32 @@
             currentEditingDraftId = null;
             currentEditingShiftId = null;
 
-            saveState();
+            // Wait for cloud sync to complete before showing success
+            try {
+                await saveState();
 
-            if (isNext) {
-                showToast('Shift Saved! Ready for next entry.', 'success');
-                initShiftForm();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            } else {
-                showToast('Shift Saved Successfully!', 'success');
-                navigate('manager-dashboard');
-                document.querySelector('.mgr-tab[data-target="tab-reports"]').click();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                if (isNext) {
+                    showToast('Shift Saved! Ready for next entry.', 'success');
+                    initShiftForm();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    showToast('Shift Saved Successfully!', 'success');
+                    navigate('manager-dashboard');
+                    
+                    // Ensure the report tab is visible and showing the correct data
+                    const fMode = document.getElementById('filter-mode');
+                    const fDate = document.getElementById('filter-date');
+                    const fStaff = document.getElementById('filter-staff');
+                    if (fMode) fMode.value = 'summary';
+                    if (fDate) fDate.value = '';
+                    if (fStaff) fStaff.value = '';
+                    
+                    document.querySelector('.mgr-tab[data-target="tab-reports"]').click();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            } catch (err) {
+                console.error(err);
+                showToast("Save failed! Please check your connection or Firebase Rules.", "error");
             }
             return true;
         };
@@ -4035,13 +4071,19 @@
                 });
                 document.querySelectorAll('.mgr-tab-content').forEach(c => c.classList.add('hidden'));
 
-                const t = e.target;
+                const t = e.currentTarget;
                 t.classList.add('active', 'text-primary', 'border-b-2', 'border-primary');
                 t.classList.remove('text-gray-500');
-                document.getElementById(t.getAttribute('data-target')).classList.remove('hidden');
+                
+                const targetId = t.getAttribute('data-target');
+                document.getElementById(targetId).classList.remove('hidden');
 
-                if (t.getAttribute('data-target') === 'tab-reports') renderReports();
-                if (t.getAttribute('data-target') === 'tab-lent') renderLentRecords();
+                if (targetId === 'tab-reports') {
+                    const mode = t.getAttribute('data-mode');
+                    if (mode) document.getElementById('filter-mode').value = mode;
+                    renderReports();
+                }
+                if (targetId === 'tab-lent') renderLentRecords();
             });
         });
 
@@ -4153,12 +4195,23 @@
         // Quick Attendance Marking
         function renderQuickAttendance() {
             const container = document.getElementById('quick-attendance-list');
+            if (!container) return;
             container.innerHTML = '';
 
-            const todayOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('attendance-today-date').textContent = new Date().toDateString();
-
-            const todayStr = new Date().toLocaleDateString();
+            const dateInput = document.getElementById('quick-attendance-date');
+            if (dateInput && !dateInput.value) {
+                // Default to today
+                const today = new Date();
+                const offset = today.getTimezoneOffset();
+                const localDate = new Date(today.getTime() - (offset*60*1000));
+                dateInput.value = localDate.toISOString().split('T')[0];
+            }
+            
+            let targetDateStr = new Date().toLocaleDateString();
+            if (dateInput && dateInput.value) {
+                const selectedDateObj = new Date(dateInput.value + 'T00:00:00');
+                targetDateStr = selectedDateObj.toLocaleDateString();
+            }
 
             if (state.users.length === 0) {
                 container.innerHTML = `<div class="col-span-full py-4 text-gray-400 font-medium">Please add staff members first.</div>`;
@@ -4169,7 +4222,7 @@
                 // If staff, only show their own quick attendance
                 if (currentUser && currentUser.role !== 'manager' && u.id !== currentUser.id) return;
 
-                const hasPunched = state.attendance.some(a => a.userId === u.id && new Date(a.timestamp).toLocaleDateString() === todayStr && a.type === 'in');
+                const hasPunched = state.attendance.some(a => a.userId === u.id && new Date(a.timestamp).toLocaleDateString() === targetDateStr && a.type === 'in');
 
                 const div = document.createElement('div');
                 div.className = "flex justify-between items-center p-3 sm:p-4 border rounded-xl dark:border-gray-700 bg-white dark:bg-gray-900/50 shadow-sm transition";
@@ -4178,7 +4231,7 @@
                     ? "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-400 px-4 py-2 rounded-lg font-bold text-xs sm:text-sm cursor-default border border-green-200 dark:border-green-800"
                     : "bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-primary hover:text-white dark:hover:bg-primary px-4 py-2 rounded-lg font-bold text-xs sm:text-sm transition cursor-pointer border border-transparent shadow-sm";
                 const btnText = hasPunched ? "<i class='fa-solid fa-check mr-1'></i> Marked" : "Mark Present";
-                const onClick = hasPunched ? "" : `onclick="markAttendance('${u.id}', '${u.name}')"`;
+                const onClick = hasPunched ? "" : `onclick="markAttendance('${u.id}', '${u.name.replace(/'/g, "\\'")}')"`;
 
                 div.innerHTML = `
                     <div>
@@ -4191,7 +4244,16 @@
         }
 
         window.markAttendance = function (userId, name) {
-            state.attendance.push({ id: Date.now().toString(), userId: userId, name: name, timestamp: new Date().toISOString(), type: 'in' });
+            const dateInput = document.getElementById('quick-attendance-date');
+            let ts = new Date().toISOString(); 
+            if (dateInput && dateInput.value) {
+                const todayStr = new Date().toISOString().split('T')[0];
+                if (dateInput.value !== todayStr) {
+                    ts = new Date(dateInput.value + 'T12:00:00').toISOString();
+                }
+            }
+
+            state.attendance.push({ id: Date.now().toString(), userId: userId, name: name, timestamp: ts, type: 'in' });
             saveState();
             renderQuickAttendance();
             renderManagerCalendar();
@@ -4254,10 +4316,19 @@
             const filterDate = document.getElementById('filter-date').value;
             const filterStaff = document.getElementById('filter-staff').value;
             const filterMode = document.getElementById('filter-mode') ? document.getElementById('filter-mode').value : 'summary';
-
+            
             tbody.innerHTML = '';
             let sourceShifts = filterMode === 'detailed' ? state.d2dShifts : state.shifts;
-            let filteredShifts = sourceShifts.slice().sort((a,b) => new Date(b.date) - new Date(a.date));
+            let filteredShifts = sourceShifts.slice().sort((a,b) => {
+                // Try to parse the date string. If invalid (e.g. Firestore Timestamp obj), fallback to parsing the ID which is Date.now()
+                let timeA = new Date(a.date).getTime();
+                if (isNaN(timeA)) timeA = parseInt(a.id) || 0;
+                
+                let timeB = new Date(b.date).getTime();
+                if (isNaN(timeB)) timeB = parseInt(b.id) || 0;
+                
+                return timeB - timeA;
+            });
 
             if (currentUser && currentUser.role === 'staff') {
                 filteredShifts = filteredShifts.filter(s => s.staffId === currentUser.id);
@@ -4270,6 +4341,10 @@
 
             if (filterStaff) {
                 filteredShifts = filteredShifts.filter(s => s.staffId === filterStaff);
+            }
+
+            if (document.getElementById('debug-shift-count')) {
+                document.getElementById('debug-shift-count').textContent = state.shifts.length + " (Filtered: " + filteredShifts.length + ")";
             }
 
             if (filteredShifts.length === 0) {
@@ -4388,10 +4463,19 @@
 
             shiftsToDisplay.forEach(s => {
                 const tr = document.createElement('tr');
-                const dt = new Date(s.date).toLocaleDateString();
-                const diffColor = s.financials.difference === 0 ? 'text-green-600 dark:text-green-400' : (s.financials.difference < 0 ? 'text-red-600 dark:text-red-400' : 'text-yellow-600 dark:text-yellow-400');
+                
+                // Safe date parsing
+                let parsedTime = new Date(s.date).getTime();
+                if (isNaN(parsedTime)) parsedTime = parseInt(s.id) || Date.now();
+                const dt = new Date(parsedTime).toLocaleDateString();
+                
+                const diffColor = s.financials && s.financials.difference === 0 ? 'text-green-600 dark:text-green-400' : (s.financials && s.financials.difference < 0 ? 'text-red-600 dark:text-red-400' : 'text-yellow-600 dark:text-yellow-400');
                 const hsdVol = (s.saleInfo && s.saleInfo.hsdVol) ? s.saleInfo.hsdVol.toFixed(2) : '0.00';
                 const msVol = (s.saleInfo && s.saleInfo.msVol) ? s.saleInfo.msVol.toFixed(2) : '0.00';
+                
+                const diffValue = s.financials && s.financials.difference ? s.financials.difference : 0;
+                const expValue = s.financials && s.financials.expenses ? s.financials.expenses : 0;
+                const lentValue = s.financials && s.financials.lent ? s.financials.lent : 0;
 
                 if (filterMode === 'detailed') {
                     tr.innerHTML = `
@@ -4403,9 +4487,9 @@
                         <td class="px-5 py-4 text-right font-black text-gray-900 dark:text-gray-100">₹${fmtNum(s.saleInfo?.totalSale)}</td>
                         <td class="px-5 py-4 text-right font-bold text-purple-600 dark:text-purple-400">₹${fmtNum(s.financials?.online)}</td>
                         <td class="px-5 py-4 text-right font-bold text-emerald-600 dark:text-emerald-400">₹${fmtNum(s.financials?.cash)}</td>
-                        <td class="px-5 py-4 text-right font-bold text-red-500 dark:text-red-400">₹${(s.financials.expenses || 0).toFixed(2)}</td>
-                        <td class="px-5 py-4 text-right font-bold text-amber-500 dark:text-amber-400">₹${(s.financials.lent || 0).toFixed(2)}</td>
-                        <td class="px-5 py-4 text-right font-black ${diffColor}">₹${s.financials.difference.toFixed(2)}</td>
+                        <td class="px-5 py-4 text-right font-bold text-red-500 dark:text-red-400">₹${expValue.toFixed(2)}</td>
+                        <td class="px-5 py-4 text-right font-bold text-amber-500 dark:text-amber-400">₹${lentValue.toFixed(2)}</td>
+                        <td class="px-5 py-4 text-right font-black ${diffColor}">₹${diffValue.toFixed(2)}</td>
                         <td class="px-5 py-4 text-center">
                             <div class="flex items-center justify-center gap-2">
                                 <button onclick="viewShiftDetails('${s.id}')" class="bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 dark:text-blue-400 px-3 py-2 rounded-lg font-bold transition text-xs flex items-center gap-1.5 active:scale-95" title="View"><i class="fa-solid fa-eye"></i></button>
@@ -4425,9 +4509,9 @@
                         <td class="px-5 py-4 text-right font-black text-gray-900 dark:text-gray-100">₹${fmtNum(s.saleInfo?.totalSale)}</td>
                         <td class="px-5 py-4 text-right font-bold text-purple-600 dark:text-purple-400">₹${fmtNum(s.financials?.online)}</td>
                         <td class="px-5 py-4 text-right font-bold text-emerald-600 dark:text-emerald-400">₹${fmtNum(s.financials?.cash)}</td>
-                        <td class="px-5 py-4 text-right font-bold text-red-500 dark:text-red-400">₹${(s.financials.expenses || 0).toFixed(2)}</td>
-                        <td class="px-5 py-4 text-right font-bold text-amber-500 dark:text-amber-400">₹${(s.financials.lent || 0).toFixed(2)}</td>
-                        <td class="px-5 py-4 text-right font-black ${diffColor}">₹${s.financials.difference.toFixed(2)}</td>
+                        <td class="px-5 py-4 text-right font-bold text-red-500 dark:text-red-400">₹${expValue.toFixed(2)}</td>
+                        <td class="px-5 py-4 text-right font-bold text-amber-500 dark:text-amber-400">₹${lentValue.toFixed(2)}</td>
+                        <td class="px-5 py-4 text-right font-black ${diffColor}">₹${diffValue.toFixed(2)}</td>
                         <td class="px-5 py-4 text-center">
                             <div class="flex items-center justify-center gap-2">
                                 <button onclick="viewShiftDetails('${s.id}')" class="bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 dark:text-blue-400 px-3 py-2 rounded-lg font-bold transition text-xs flex items-center gap-1.5 active:scale-95" title="View"><i class="fa-solid fa-eye"></i></button>
@@ -5563,16 +5647,18 @@
             document.getElementById('nav-logout').classList.remove('hidden');
 
             const isStaff = currentUser.role === 'staff';
-            const tabReports = document.querySelector('.mgr-tab[data-target="tab-reports"]');
+            const tabReports = document.querySelectorAll('.mgr-tab[data-target="tab-reports"]');
             const tabStaff = document.querySelector('.mgr-tab[data-target="tab-staff"]');
             const tabAtt = document.querySelector('.mgr-tab[data-target="tab-attendance"]');
+            const tabLent = document.querySelector('.mgr-tab[data-target="tab-lent"]');
             const btnRates = document.getElementById('btn-edit-rates');
 
             if (isStaff) {
                 // Lock down Staff
-                tabReports.classList.remove('hidden');
-                tabStaff.classList.add('hidden');
-                tabAtt.classList.remove('hidden');
+                tabReports.forEach(tab => tab.classList.remove('hidden'));
+                if (tabStaff) tabStaff.classList.add('hidden');
+                if (tabAtt) tabAtt.classList.remove('hidden');
+                if (tabLent) tabLent.classList.add('hidden');
                 document.getElementById('nav-downloads').classList.add('hidden');
                 document.getElementById('nav-drafts').classList.remove('hidden'); // allow drafts
                 if (btnRates) btnRates.classList.add('hidden');
@@ -5592,12 +5678,13 @@
 
                 // Route them to dashboard
                 navigate('manager-dashboard');
-                document.querySelector('.mgr-tab[data-target="tab-reports"]').click();
+                if (tabReports.length > 0) tabReports[0].click();
             } else {
                 // Manager
-                tabReports.classList.remove('hidden');
-                tabStaff.classList.remove('hidden');
-                tabAtt.classList.remove('hidden');
+                tabReports.forEach(tab => tab.classList.remove('hidden'));
+                if (tabStaff) tabStaff.classList.remove('hidden');
+                if (tabAtt) tabAtt.classList.remove('hidden');
+                if (tabLent) tabLent.classList.remove('hidden');
                 document.getElementById('nav-downloads').classList.remove('hidden');
                 document.getElementById('nav-drafts').classList.remove('hidden');
                 if (btnRates) btnRates.classList.remove('hidden');
