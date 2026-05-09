@@ -4864,6 +4864,7 @@
 
             // 1. Independent Lent Records
             state.lentRecords.forEach(r => {
+                if (r.status === 'paid') return;
                 allRecords.push({
                     source: 'Independent Record',
                     id: r.id,
@@ -4879,6 +4880,7 @@
             state.shifts.forEach(s => {
                 if (s.financials && s.financials.lentDetails && s.financials.lentDetails.length > 0) {
                     s.financials.lentDetails.forEach((ld, idx) => {
+                        if (ld.status === 'paid') return;
                         allRecords.push({
                             source: `Shift: ${s.staffName}`,
                             id: `${s.id}_${idx}`,
@@ -4897,6 +4899,7 @@
             state.d2dShifts.forEach(s => {
                 if (s.financials && s.financials.lentDetails && s.financials.lentDetails.length > 0) {
                     s.financials.lentDetails.forEach((ld, idx) => {
+                        if (ld.status === 'paid') return;
                         allRecords.push({
                             source: `Master Log: ${s.staffName}`,
                             id: `${s.id}_${idx}`,
@@ -4962,6 +4965,9 @@
                     actionBtn = `<button onclick="editShift('${r.shiftId}')" class="bg-amber-50 hover:bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 dark:text-amber-400 px-3 py-2 rounded-lg font-bold transition text-xs flex items-center justify-center mx-auto gap-1.5 active:scale-95" title="Edit Source Shift"><i class="fa-solid fa-pen"></i> Edit Shift</button>`;
                 }
 
+                const paidBtn = `<button onclick="markLentAsPaid('${r.id}', '${r.type}', '${r.shiftId || ''}')" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:hover:bg-emerald-900/50 dark:text-emerald-400 px-3 py-2 rounded-lg font-bold transition text-xs flex items-center justify-center mx-auto gap-1.5 active:scale-95" title="Mark as Paid"><i class="fa-solid fa-check-circle"></i> Mark as Paid</button>`;
+                actionBtn = `<div class="flex flex-col sm:flex-row gap-2 justify-center">${paidBtn}${actionBtn}</div>`;
+
                 tr.innerHTML = `
                     <td class="px-5 py-4 font-bold text-gray-900 dark:text-gray-100">${dt.toLocaleDateString()}</td>
                     <td class="px-5 py-4 font-medium text-xs text-gray-500 bg-gray-50/50 dark:bg-gray-800/30 dark:text-gray-400">${r.source}</td>
@@ -5026,6 +5032,66 @@
                 renderLentRecords();
                 showToast("Lent record deleted", "success");
             }
+        };
+
+        window.markLentAsPaid = function(id, type, shiftId) {
+            let amount = 0;
+            let targetShift = null;
+
+            if (type === 'independent') {
+                const rec = state.lentRecords.find(r => r.id === id);
+                if (rec) {
+                    rec.status = 'paid';
+                    rec.paid_at = new Date().toISOString();
+                    amount = rec.amount;
+                }
+            } else if (type === 'shift') {
+                targetShift = state.shifts.find(s => s.id === shiftId);
+                if (targetShift && targetShift.financials && targetShift.financials.lentDetails) {
+                    const idxStr = id.split('_').pop();
+                    const idx = parseInt(idxStr);
+                    const ld = targetShift.financials.lentDetails[idx];
+                    if (ld && ld.status !== 'paid') {
+                        ld.status = 'paid';
+                        ld.paid_at = new Date().toISOString();
+                        amount = ld.amount;
+                    }
+                }
+            } else if (type === 'd2d') {
+                targetShift = state.d2dShifts.find(s => s.id === shiftId);
+                if (targetShift && targetShift.financials && targetShift.financials.lentDetails) {
+                    const idxStr = id.split('_').pop();
+                    const idx = parseInt(idxStr);
+                    const ld = targetShift.financials.lentDetails[idx];
+                    if (ld && ld.status !== 'paid') {
+                        ld.status = 'paid';
+                        ld.paid_at = new Date().toISOString();
+                        amount = ld.amount;
+                    }
+                }
+            }
+
+            if (amount > 0 && targetShift) {
+                // Denomination math: only 500s and coins
+                let rem = amount;
+                const d500 = Math.floor(rem / 500); rem %= 500;
+                const coins = rem;
+
+                targetShift.denominations = targetShift.denominations || {};
+                targetShift.denominations.c500 = (parseInt(targetShift.denominations.c500) || 0) + d500;
+                targetShift.denominations.coins = (parseInt(targetShift.denominations.coins) || 0) + coins;
+
+                // Adjust totals: cash increases by amount, lent decreases by amount
+                targetShift.financials.cash = (targetShift.financials.cash || 0) + amount;
+                targetShift.financials.lent = Math.max(0, (targetShift.financials.lent || 0) - amount);
+            }
+
+            saveState();
+            renderLentRecords();
+            if (typeof renderReports === 'function') {
+                renderReports();
+            }
+            showToast("Lent amount settled and added to shift cash.", "success");
         };
 
         window.exportGeneralLentPDF = function () {
@@ -5218,7 +5284,7 @@
             }
 
             doc.setFontSize(18);
-            doc.text(singleShiftId ? `Santosh Filling Station - Individual Shift Report` : "Santosh Filling Station - Management Report", 14, 22);
+            doc.text(singleShiftId ? `Santosh Filling Station - ${shiftsToExport[0].staffName} Shift Report` : "Santosh Filling Station - Management Report", 14, 22);
 
             const tableData = [];
             const expenseData = [];
